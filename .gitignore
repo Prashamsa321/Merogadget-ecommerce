@@ -1,0 +1,22 @@
+# Root-level safety net
+node_modules/
+**/node_modules/
+.env
+**/.env
+.env.*
+**/.env.*
+*.log
+.DS_Store
+Thumbs.db
+dist/
+**/dist/
+build/
+**/build/
+coverage/
+.vite/
+**/.vite/
+**/src-backup-*/
+.vscode/
+.idea/
+tmp/
+temp/
