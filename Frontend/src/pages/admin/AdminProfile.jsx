@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import axios from 'axios';
+import api from '../../services/api';
 
 const AdminProfile = () => {
   const { user, token } = useAuth();
@@ -25,11 +25,7 @@ const AdminProfile = () => {
     setLoading(true);
 
     try {
-      await axios.put(
-        'http://localhost:5000/api/auth/updateprofile',
-        formData,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.put('/auth/updateprofile', formData);
       success('Profile updated successfully');
       setIsEditing(false);
     } catch (err) {

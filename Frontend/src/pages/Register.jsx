@@ -156,16 +156,18 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cream flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-cream flex items-center justify-center px-4 sm:px-6 lg:px-10 xl:px-16 py-12">
       <div className="w-full max-w-xl bg-white rounded-3xl shadow-xl overflow-hidden border border-orange-100 p-8 md:p-10">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
-              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z" />
-              </svg>
+        <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30 overflow-hidden">
+              <img
+                src="/Logo.png"
+                alt="MeroGadget icon"
+                className="w-full h-full object-contain"
+              />
             </div>
             <span className="text-xl font-bold text-[#3D1A00] tracking-tight">
               Mero<span className="text-orange-600">Gadget</span>

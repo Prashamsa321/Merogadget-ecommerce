@@ -97,7 +97,7 @@ const CartPage = () => {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-cream py-16">
+      <div className="min-h-screen bg-cream py-16 px-4 sm:px-6 lg:px-10 xl:px-16">
         <div className="container mx-auto max-w-3xl">
           <div className="text-center py-20">
             <div className="text-7xl mb-6">🛒</div>
@@ -116,7 +116,7 @@ const CartPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-cream py-16">
+    <div className="min-h-screen bg-cream py-16 px-4 sm:px-6 lg:px-10 xl:px-16">
       <div className="container mx-auto max-w-7xl">
 
         {/* Header */}

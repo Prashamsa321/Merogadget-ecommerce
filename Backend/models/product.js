@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 
 const productSchema = new mongoose.Schema({
   _id: {
-    type: String,   
+    type: String,
   },
   name: {
     type: String,
@@ -39,7 +39,7 @@ const productSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
-}, { _id: false, strict: false })  
+}, { strict: false })
 
 const Product = mongoose.models.Product || mongoose.model('Product', productSchema)
 export default Product

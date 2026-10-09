@@ -1,7 +1,5 @@
-import React, { createContext, useState, useContext, useEffect } from 'react'
-import axios from 'axios'
-
-const API_URL = 'http://localhost:5000/api'
+﻿import React, { createContext, useState, useContext, useEffect } from 'react'
+import api from '../services/api'
 
 export const AuthContext = createContext(null)
 
@@ -31,7 +29,7 @@ export const AuthProvider = ({ children }) => {
           setUser(userData)
           setIsAuthenticated(true)
           setToken(storedToken)
-          axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`
+          api.defaults.headers.common['Authorization'] = 'Bearer ' + storedToken
         } catch (error) {
           console.error('Error parsing user data:', error)
           localStorage.removeItem('token')
@@ -47,10 +45,7 @@ export const AuthProvider = ({ children }) => {
   // Login function
   const login = async (email, password) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, {
-        email,
-        password
-      })
+      const response = await api.post('/auth/login', { email, password })
       
       const { token, user } = response.data
       
@@ -60,7 +55,7 @@ export const AuthProvider = ({ children }) => {
       setUser(user)
       setIsAuthenticated(true)
       
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      api.defaults.headers.common['Authorization'] = 'Bearer ' + token
       
       return { success: true, user }
     } catch (error) {
@@ -75,11 +70,7 @@ export const AuthProvider = ({ children }) => {
   // Register function
   const register = async (name, email, password) => {
     try {
-      const response = await axios.post(`${API_URL}/auth/register`, {
-        name,
-        email,
-        password
-      })
+      const response = await api.post('/auth/register', { name, email, password })
       
       const { token, user } = response.data
       
@@ -89,7 +80,7 @@ export const AuthProvider = ({ children }) => {
       setUser(user)
       setIsAuthenticated(true)
       
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      api.defaults.headers.common['Authorization'] = 'Bearer ' + token
       
       return { success: true, user }
     } catch (error) {
@@ -101,19 +92,16 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  // Logout function - FIXED (removed API call)
+  // Logout function
   const logout = () => {
-    // Clear local storage
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     
-    // Clear state
     setToken(null)
     setUser(null)
     setIsAuthenticated(false)
     
-    // Remove axios default header
-    delete axios.defaults.headers.common['Authorization']
+    delete api.defaults.headers.common['Authorization']
   }
 
   const value = {

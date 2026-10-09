@@ -9,18 +9,10 @@ const CategoriesPage = () => {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [editingCategory, setEditingCategory] = useState(null);
   const [editName, setEditName] = useState('');
-  const [editIcon, setEditIcon] = useState('');
   const { success, error } = useToast();
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
-
-  const iconOptions = [
-    { icon: '📺' }, { icon: '🧊' }, { icon: '❄️' }, { icon: '⌚' },
-    { icon: '📱' }, { icon: '💻' }, { icon: '🎧' }, { icon: '🎮' },
-    { icon: '📷' }, { icon: '🔊' }, { icon: '🖥️' }, { icon: '⌨️' },
-    { icon: '🖨️' }, { icon: '📡' }, { icon: '🔋' }, { icon: '💾' }
-  ];
 
   useEffect(() => {
     fetchCategories();
@@ -47,8 +39,7 @@ const CategoriesPage = () => {
 
     try {
       await categoryService.createCategory({
-        name: newCategoryName,
-        icon: '📦'
+        name: newCategoryName
       });
 
       success('Category added successfully');
@@ -62,7 +53,6 @@ const CategoriesPage = () => {
   const handleEditCategory = (category) => {
     setEditingCategory(category);
     setEditName(category.name);
-    setEditIcon(category.icon || '📦');
   };
 
   const handleUpdateCategory = async () => {
@@ -73,8 +63,7 @@ const CategoriesPage = () => {
 
     try {
       await categoryService.updateCategory(editingCategory._id, {
-        name: editName,
-        icon: editIcon
+        name: editName
       });
 
       success('Category updated successfully');
@@ -88,7 +77,6 @@ const CategoriesPage = () => {
   const handleCancelEdit = () => {
     setEditingCategory(null);
     setEditName('');
-    setEditIcon('📦');
   };
 
   const openDeleteModal = (category) => {
@@ -161,7 +149,6 @@ const CategoriesPage = () => {
           <table className="min-w-full divide-y divide-orange-100">
             <thead className="bg-[#FFF4E6]">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-bold text-orange-700 uppercase tracking-widest">Icon</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-orange-700 uppercase tracking-widest">Category Name</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-orange-700 uppercase tracking-widest">Products</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-orange-700 uppercase tracking-widest">Actions</th>
@@ -170,8 +157,7 @@ const CategoriesPage = () => {
             <tbody className="bg-white divide-y divide-orange-50">
               {categories.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="px-6 py-12 text-center text-[#7A6A5A]">
-                    <div className="text-5xl mb-3">🏷️</div>
+                  <td colSpan="3" className="px-6 py-12 text-center text-[#7A6A5A]">
                     <p className="font-semibold text-[#3D1A00]">No categories found</p>
                     <p className="text-sm mt-1">Click "Add Category" to create your first category</p>
                   </td>
@@ -180,21 +166,7 @@ const CategoriesPage = () => {
                 categories.map((category) => (
                   <tr key={category._id} className="hover:bg-orange-50/50 transition-colors">
                     {editingCategory?._id === category._id ? (
-                      // Edit Mode
                       <>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <select
-                            value={editIcon}
-                            onChange={(e) => setEditIcon(e.target.value)}
-                            className="px-3 py-2 bg-cream border border-orange-100 rounded-xl text-[#3D1A00] focus:outline-none focus:ring-2 focus:ring-orange-400"
-                          >
-                            {iconOptions.map(option => (
-                              <option key={option.icon} value={option.icon}>
-                                {option.icon}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <input
                             type="text"
@@ -230,17 +202,13 @@ const CategoriesPage = () => {
                         </td>
                       </>
                     ) : (
-                      // View Mode
                       <>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-2xl">{category.icon || '📦'}</span>
-                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="font-semibold text-[#3D1A00]">{category.name}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-50 text-orange-700 text-xs font-semibold rounded-full border border-orange-100">
-                            📦 {category.productCount || 0}
+                            {category.productCount || 0}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">

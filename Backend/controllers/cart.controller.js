@@ -62,7 +62,7 @@ export const addToCart = async (req, res) => {
       return res.status(400).json({
         success: false,
         alreadyInCart: true,
-        message: `${product.name} is already in your cart. You can update quantity in the cart page.`,
+        message: `item is already in your cart.`,
         items: cart.items,
         totalAmount: cart.totalAmount
       });

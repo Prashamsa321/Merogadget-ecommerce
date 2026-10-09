@@ -25,16 +25,18 @@ const Footer = () => {
 
   return (
     <footer className="bg-[#2B0F00] text-[#FDF6EC]">
-      <div className="container mx-auto max-w-7xl pt-14 pb-8">
+      <div className="container mx-auto max-w-7xl pt-14 pb-8 px-4 sm:px-6 lg:px-10 xl:px-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-10">
 
           {/* Brand */}
           <div>
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z" />
-                </svg>
+              <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30 overflow-hidden">
+                <img
+                  src="/Logo.png"
+                  alt="MeroGadget icon"
+                  className="w-full h-full object-contain"
+                />
               </div>
               <h2 className="text-2xl font-bold text-white tracking-tight">
                 Mero<span className="text-orange-400">Gadget</span>

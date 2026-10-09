@@ -1,12 +1,27 @@
 import Category from '../models/Category.js';
+import Product from '../models/product.js';
 
-// Get all categories
+// Get all categories with product counts
 export const getAllCategories = async (req, res) => {
   try {
     const categories = await Category.find({}).sort({ name: 1 });
+
+    // Count products per category (case-insensitive match)
+    const counts = await Product.aggregate([
+      { $group: { _id: { $toLower: '$category' }, count: { $sum: 1 } } }
+    ]);
+
+    const countMap = {};
+    counts.forEach(c => { countMap[c._id] = c.count; });
+
+    const categoriesWithCount = categories.map(cat => ({
+      ...cat.toObject(),
+      productCount: countMap[cat.name.toLowerCase()] || 0
+    }));
+
     res.status(200).json({
       success: true,
-      categories: categories
+      categories: categoriesWithCount
     });
   } catch (error) {
     console.error('Get categories error:', error);

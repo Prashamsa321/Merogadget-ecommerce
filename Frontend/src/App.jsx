@@ -1,4 +1,5 @@
-import { Routes, Route, useLocation, Navigate, Outlet } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Navbar from './components/layout/Navbar';
 import AdminLayout from './components/layout/AdminLayout';
@@ -16,7 +17,6 @@ import PaymentSuccess from './pages/paymentsuccess';
 import CheckoutPage from './pages/CheckoutPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 
-
 // Admin pages
 import AdminContacts from './pages/admin/AdminContacts';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -27,9 +27,21 @@ import CategoriesPage from './pages/admin/CategoriesPage';
 import CreateProductPage from './pages/admin/CreateProductPage';
 import AdminProfile from './pages/admin/AdminProfile';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminReports from './pages/admin/AdminReports';
+import AdminAnalytics from './pages/admin/AdminAnalytics';
 import Footer from './components/layout/Footer';
 import OrdersPage from './pages/OrdersPage';
 
+// ✅ Scrolls to top of page on every route change
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
+
+  return null;
+}
 
 function App() {
   const location = useLocation();
@@ -44,6 +56,9 @@ function App() {
 
   return (
     <div>
+      {/* ✅ Scrolls to top on every page navigation */}
+      <ScrollToTop />
+
       {/* Only show Navbar if NOT on admin routes */}
       {!isAdminRoute && <Navbar />}
 
@@ -59,26 +74,20 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/paymentsuccess" element={<PaymentSuccess />} />
-        
-              <Route path="/checkout" element={
-        <PrivateRoute>
-          <CheckoutPage />
-        </PrivateRoute>
-      }/>  
-            <Route path="/orders" element={
-        <PrivateRoute>
-          <OrdersPage />
-        </PrivateRoute>
-      } />
-   
 
+        <Route path="/checkout" element={
+          <PrivateRoute>
+            <CheckoutPage />
+          </PrivateRoute>
+        } />
 
+        <Route path="/orders" element={
+          <PrivateRoute>
+            <OrdersPage />
+          </PrivateRoute>
+        } />
 
-          <Route path="/profile" element={<ProfilePage />} />
-        
-        {/* Protected Route - User must be logged in */}
-        {/* <Route element={<PrivateRoute adminOnly={false} />}>
-        </Route> */}
+        <Route path="/profile" element={<ProfilePage />} />
 
         {/* Admin Routes - For admin only */}
         <Route path="/admin" element={
@@ -96,6 +105,8 @@ function App() {
           <Route path="profile" element={<AdminProfile />} />
           <Route path="contacts" element={<AdminContacts />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="reports" element={<AdminReports />} />
+          <Route path="analytics" element={<AdminAnalytics />} />
         </Route>
       </Routes>
 

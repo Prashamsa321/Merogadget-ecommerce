@@ -183,7 +183,7 @@ const CheckoutPage = () => {
 
   if (orderSuccess) {
     return (
-      <div className="min-h-screen bg-cream flex items-center justify-center p-4">
+      <div className="min-h-screen bg-cream flex items-center justify-center px-4 sm:px-6 lg:px-10 xl:px-16 py-12">
         <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center border border-orange-100 shadow-soft animate-scale-in">
           <div className="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-12 h-12 text-green-600" />
@@ -208,7 +208,7 @@ const CheckoutPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-cream py-10">
+    <div className="min-h-screen bg-cream py-10 px-4 sm:px-6 lg:px-10 xl:px-16">
       <div className="container mx-auto max-w-6xl">
 
         {/* Header */}

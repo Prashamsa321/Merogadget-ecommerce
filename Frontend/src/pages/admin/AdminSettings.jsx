@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import axios from 'axios';
+import api from '../../services/api';
 
 const AdminSettings = () => {
   const { user, token } = useAuth();
@@ -41,14 +41,10 @@ const AdminSettings = () => {
 
     setLoading(true);
     try {
-      await axios.put(
-        'http://localhost:5000/api/auth/change-password',
-        {
+      await api.put('/auth/change-password', {
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+        });
       success('Password changed successfully!');
       setPasswordData({
         currentPassword: '',

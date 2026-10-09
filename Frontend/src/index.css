@@ -33,6 +33,11 @@ h1, h2, h3, h4, h5, h6 {
   color: #F15A29;
 }
 
+/* Consistent left and right spacing across all frontend pages */
+.page-padding {
+  @apply px-4 sm:px-6 lg:px-10 xl:px-16;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: #F5EDE0; }

@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
-import axios from 'axios';
+import api from '../services/api';
 
-const API_URL = 'http://localhost:5000/api';
 
 const ForgotPassword = () => {
   const [step, setStep] = useState(1);
@@ -122,7 +121,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cream flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-cream flex items-center justify-center px-4 sm:px-6 lg:px-10 xl:px-16 py-12">
       <div className="w-full max-w-md">
 
         {/* Logo */}

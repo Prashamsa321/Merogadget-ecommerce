@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
-import axios from 'axios';
+import api from '../services/api';
 
 const ProfilePage = () => {
   const { user, token, isAuthenticated, loading: authLoading } = useAuth();
@@ -54,11 +54,7 @@ const ProfilePage = () => {
     setLoading(true);
 
     try {
-      await axios.put(
-        'http://localhost:5000/api/auth/updateprofile',
-        formData,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.put('/auth/updateprofile', formData);
       success('Profile updated successfully');
       setIsEditing(false);
     } catch (err) {
@@ -95,14 +91,10 @@ const ProfilePage = () => {
 
     setPasswordLoading(true);
     try {
-      const response = await axios.put(
-        'http://localhost:5000/api/auth/change-password',
-        {
+      const response = await api.put('/auth/change-password', {
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+        });
 
       if (response.data.success) {
         success(response.data.message || 'Password changed successfully!');
@@ -141,7 +133,7 @@ const ProfilePage = () => {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen bg-cream py-16">
+      <div className="min-h-screen bg-cream py-16 px-4 sm:px-6 lg:px-10 xl:px-16">
         <div className="container mx-auto max-w-xl">
           <div className="bg-white rounded-3xl border border-orange-100 shadow-soft p-10 text-center">
             <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center text-4xl mx-auto mb-5">
@@ -162,7 +154,7 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-cream py-12">
+    <div className="min-h-screen bg-cream py-12 px-4 sm:px-6 lg:px-10 xl:px-16">
       <div className="container mx-auto max-w-4xl">
 
         {/* Header */}

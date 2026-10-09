@@ -1,21 +1,9 @@
-import axios from 'axios'
-
-const API_URL = 'http://localhost:5000/api'
-
-const getAuthConfig = () => {
-  const token = localStorage.getItem('token')
-  return {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  }
-}
+﻿import api from './api'
 
 export const cartService = {
   async getCart() {
     try {
-      const response = await axios.get(`${API_URL}/cart`, getAuthConfig())
+      const response = await api.get('/cart')
       return {
         items: response.data?.items || [],
         totalAmount: response.data?.totalAmount || 0
@@ -28,31 +16,23 @@ export const cartService = {
 
   async addToCart(productId, quantity = 1) {
     try {
-      const response = await axios.post(
-        `${API_URL}/cart/addtocart`,
-        { productId, quantity },
-        getAuthConfig()
-      );
-      console.log('Add to cart response:', response.data);
+      const response = await api.post('/cart/addtocart', { productId, quantity })
+      console.log('Add to cart response:', response.data)
       return {
         success: response.data.success,
         alreadyInCart: response.data.alreadyInCart || false,
         message: response.data.message,
         items: response.data?.items || [],
         totalAmount: response.data?.totalAmount || 0
-      };
+      }
     } catch (error) {
-      throw error;
+      throw error
     }
   },
 
   async updateCartItem(productId, quantity) {
     try {
-      const response = await axios.put(
-        `${API_URL}/cart/update`,
-        { productId, quantity },
-        getAuthConfig()
-      )
+      const response = await api.put('/cart/update', { productId, quantity })
       return {
         items: response.data?.items || [],
         totalAmount: response.data?.totalAmount || 0
@@ -65,10 +45,7 @@ export const cartService = {
 
   async removeFromCart(productId) {
     try {
-      const response = await axios.delete(
-        `${API_URL}/cart/remove/${productId}`,
-        getAuthConfig()
-      )
+      const response = await api.delete('/cart/remove/' + productId)
       return {
         items: response.data?.items || [],
         totalAmount: response.data?.totalAmount || 0
@@ -81,7 +58,7 @@ export const cartService = {
 
   async clearCart() {
     try {
-      const response = await axios.delete(`${API_URL}/cart/clear`, getAuthConfig())
+      const response = await api.delete('/cart/clear')
       return {
         items: response.data?.items || [],
         totalAmount: response.data?.totalAmount || 0

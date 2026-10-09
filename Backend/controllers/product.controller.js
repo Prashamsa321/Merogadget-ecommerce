@@ -1,13 +1,13 @@
-import Product from '../models/Product.js'
+import Product from '../models/product.js'
 
 // Get all products
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find({})    
+    const products = await Product.find({})
     res.status(200).json({
       success: true,
       count: products.length,
-      products: products  // Make sure this is the key
+      products: products
     })
   } catch (error) {
     console.error('Get products error:', error)
@@ -46,7 +46,24 @@ export const getProductById = async (req, res) => {
 // Create product (admin only)
 export const createProduct = async (req, res) => {
   try {
-    const product = await Product.create(req.body)
+    const productData = { ...req.body }
+
+    // ✅ Auto-generate unique string _id if not provided
+    if (!productData._id) {
+      productData._id = `prod_${Date.now()}_${Math.floor(Math.random() * 1000)}`
+    }
+
+    // ✅ Ensure images array exists
+    if (!productData.images || !Array.isArray(productData.images)) {
+      productData.images = productData.image ? [productData.image] : []
+    }
+
+    // ✅ Sync `image` (singular) with images[0]
+    if (!productData.image && productData.images[0]) {
+      productData.image = productData.images[0]
+    }
+
+    const product = await Product.create(productData)
     res.status(201).json({
       success: true,
       product: product
@@ -64,9 +81,18 @@ export const createProduct = async (req, res) => {
 // Update product (admin only)
 export const updateProduct = async (req, res) => {
   try {
+    const updateData = { ...req.body }
+
+    // ✅ Sync image/images both ways
+    if (updateData.images && Array.isArray(updateData.images) && updateData.images[0]) {
+      updateData.image = updateData.images[0]
+    } else if (updateData.image && !updateData.images) {
+      updateData.images = [updateData.image]
+    }
+
     const product = await Product.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updateData,
       { new: true, runValidators: true }
     )
     if (!product) {
@@ -101,7 +127,7 @@ export const deleteProduct = async (req, res) => {
     }
     res.status(200).json({
       success: true,
-      message: ` Product deleted successfully`
+      message: 'Product deleted successfully'
     })
   } catch (error) {
     console.error('Delete product error:', error)

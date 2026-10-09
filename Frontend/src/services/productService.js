@@ -1,23 +1,9 @@
-import axios from 'axios'
-
-const API_URL = 'http://localhost:5000/api'
-
-const getAuthConfig = () => {
-  const token = localStorage.getItem('token')
-  return {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  }
-}
+import api from './api'
 
 export const productService = {
-  // Get all products
   async getAllProducts() {
     try {
-      const response = await axios.get(`${API_URL}/products/getproduct`)
-      
+      const response = await api.get('/products/getproduct')
       if (response.data && response.data.success && Array.isArray(response.data.products)) {
         return response.data.products
       } else if (Array.isArray(response.data)) {
@@ -34,10 +20,9 @@ export const productService = {
     }
   },
 
-  // Get single product
   async getProductById(id) {
     try {
-      const response = await axios.get(`${API_URL}/products/getproduct/${id}`)
+      const response = await api.get(`/products/getproduct/${id}`)
       return response.data.product || response.data
     } catch (error) {
       console.error('Get product error:', error.response?.data || error.message)
@@ -45,14 +30,9 @@ export const productService = {
     }
   },
 
-  // Create new product (Admin only)
   async createProduct(productData) {
     try {
-      const response = await axios.post(
-        `${API_URL}/products/createproduct`,
-        productData,
-        getAuthConfig()
-      )
+      const response = await api.post('/products/createproduct', productData)
       return response.data
     } catch (error) {
       console.error('Create product error:', error.response?.data || error.message)
@@ -60,14 +40,9 @@ export const productService = {
     }
   },
 
-  // Update product (Admin only)
   async updateProduct(id, productData) {
     try {
-      const response = await axios.put(
-        `${API_URL}/products/updateproduct/${id}`,
-        productData,
-        getAuthConfig()
-      )
+      const response = await api.put(`/products/updateproduct/${id}`, productData)
       return response.data
     } catch (error) {
       console.error('Update product error:', error.response?.data || error.message)
@@ -75,13 +50,9 @@ export const productService = {
     }
   },
 
-  // Delete product (Admin only)
   async deleteProduct(id) {
     try {
-      const response = await axios.delete(
-        `${API_URL}/products/deleteproduct/${id}`,
-        getAuthConfig()
-      )
+      const response = await api.delete(`/products/deleteproduct/${id}`)
       return response.data
     } catch (error) {
       console.error('Delete product error:', error.response?.data || error.message)

@@ -117,7 +117,7 @@ const OrdersPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-cream py-10">
+    <div className="min-h-screen bg-cream py-10 px-4 sm:px-6 lg:px-10 xl:px-16">
       <div className="container mx-auto max-w-6xl">
 
         {/* Header */}

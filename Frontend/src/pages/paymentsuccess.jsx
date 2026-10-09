@@ -79,7 +79,7 @@ const PaymentSuccess = () => {
   }, [pidx, orderId, success, toastError, navigate]);
 
   return (
-    <div className="min-h-screen bg-cream flex items-center justify-center p-4 py-12">
+    <div className="min-h-screen bg-cream flex items-center justify-center px-4 sm:px-6 lg:px-10 xl:px-16 py-12">
       <div className="bg-white rounded-3xl p-8 md:p-10 max-w-md w-full text-center border border-orange-100 shadow-soft">
 
         {/* VERIFYING */}

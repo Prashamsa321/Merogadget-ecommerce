@@ -17,7 +17,7 @@ const ProductsPage = () => {
   const { error } = useToast();
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(8);
+  const [itemsPerPage] = useState(12);
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
@@ -31,7 +31,6 @@ const ProductsPage = () => {
 
   useEffect(() => {
     fetchProducts();
-    fetchCategories();
   }, []);
 
   const fetchProducts = async () => {
@@ -40,7 +39,7 @@ const ProductsPage = () => {
       const data = await productService.getAllProducts();
       const productsArray = Array.isArray(data) ? data : [];
       setProducts(productsArray);
-      const uniqueCategories = [...new Set(productsArray.map(p => p.category).filter(Boolean))];
+      const uniqueCategories = [...new Set(productsArray.map(p => p.category).filter(Boolean))].sort();
       setCategories(uniqueCategories);
     } catch (err) {
       console.error('Failed to fetch products:', err);
@@ -51,20 +50,9 @@ const ProductsPage = () => {
     }
   };
 
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/categories');
-      const data = await response.json();
-      if (data.success && data.categories) {
-        setCategories(data.categories.map(c => c.name));
-      }
-    } catch (err) {
-      console.error('Error fetching categories:', err);
-    }
-  };
-
   const filteredProducts = products.filter(product => {
-    const matchesCategory = !selectedCategory || product.category === selectedCategory;
+    const matchesCategory = !selectedCategory ||
+      (product.category && product.category.toLowerCase() === selectedCategory.toLowerCase());
     const matchesSearch = !searchTerm ||
       product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.description?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -101,11 +89,12 @@ const ProductsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-cream py-12">
+    <div className="min-h-screen bg-cream py-6 px-4 sm:px-6 lg:px-10 xl:px-16">
       <div className="container mx-auto max-w-7xl">
+
         {/* Admin banner */}
         {isAdmin && (
-          <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 mb-8">
+          <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 mb-6">
             <div className="flex items-center gap-3">
               <span className="text-2xl">👑</span>
               <div className="flex-1">
@@ -122,45 +111,43 @@ const ProductsPage = () => {
           </div>
         )}
 
-        {/* Header */}
-        <div className="mb-10">
-          <p className="eyebrow mb-2">Full catalog</p>
-          <h1 className="text-4xl md:text-5xl font-bold text-[#3D1A00] mb-3">
-            {selectedCategory ? `${selectedCategory}` : 'Choose your next upgrade.'}
-          </h1>
-          <p className="text-[#7A6A5A] max-w-2xl">
-            Comforting technology, fresh new arrivals, and sweet deals made to brighten your day.
-          </p>
-        </div>
+        <div className="mb-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
 
-        {/* Search + Filter bar */}
-        <div className="bg-white rounded-2xl p-5 mb-8 border border-orange-100 shadow-soft">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-[#3D1A00] uppercase tracking-widest mb-2">
-                Search
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setSelectedCategory('');
-                    setSearchParams({});
-                  }}
-                  className="w-full px-4 py-3 pl-10 bg-cream border border-orange-100 rounded-full text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                />
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A8998A]">🔍</span>
-              </div>
+          {/* Left: heading */}
+          <div className="shrink-0">
+            <p className="eyebrow mb-1">Full catalog</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-[#3D1A00] mb-1">
+              {selectedCategory ? `${selectedCategory}` : 'Choose your next upgrade.'}
+            </h1>
+            <p className="text-[#7A6A5A] text-sm">
+              Comforting technology, fresh arrivals, and sweet deals.
+            </p>
+          </div>
+
+          <div className="flex flex-col p-5 sm:flex-row gap-5 w-full lg:w-auto lg:max-w-2xl">
+
+            {/* Search — with glow effect */}
+            <div className="relative flex-1 min-w-0 sm:min-w-[220px]">
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setSelectedCategory('');
+                  setSearchParams({});
+                }}
+                className="w-full px-6 py-3 pl-11 bg-white border border-orange-100 rounded-full text-sm text-[#3D1A00] placeholder-[#A8998A] focus:outline-none transition-all duration-300
+                  shadow-[0_0_0_3px_rgba(241,90,41,0.06),0_2px_8px_rgba(241,90,41,0.10)]
+                  focus:border-orange-300
+                  focus:shadow-[0_0_0_4px_rgba(241,90,41,0.15),0_0_20px_rgba(241,90,41,0.25)]"
+              />
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A8998A] text-sm">🔍</span>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-[#3D1A00] uppercase tracking-widest mb-2">
-                Category
-              </label>
-              <div className="flex gap-2">
+            {/* Category — with custom arrow */}
+            <div className="flex gap-2 shrink-0">
+              <div className="relative">
                 <select
                   value={selectedCategory}
                   onChange={(e) => {
@@ -173,29 +160,41 @@ const ProductsPage = () => {
                     setSearchTerm('');
                     setCurrentPage(1);
                   }}
-                  className="flex-1 px-4 py-3 bg-cream border border-orange-100 rounded-full text-[#3D1A00] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                  className="appearance-none pl-5 pr-11 py-3 bg-white border border-orange-100 rounded-full text-sm text-[#3D1A00] focus:outline-none cursor-pointer transition-all duration-300
+                    shadow-[0_0_0_3px_rgba(241,90,41,0.06),0_2px_8px_rgba(241,90,41,0.10)]
+                    focus:border-orange-300
+                    focus:shadow-[0_0_0_4px_rgba(241,90,41,0.15),0_0_20px_rgba(241,90,41,0.25)]"
                 >
                   <option value="">All Categories</option>
                   {categories.map(category => (
                     <option key={category} value={category}>{category}</option>
                   ))}
                 </select>
-                {selectedCategory && (
-                  <button
-                    onClick={clearCategoryFilter}
-                    className="px-5 py-3 bg-[#3D1A00] text-white rounded-full hover:bg-orange-600 transition-colors font-semibold text-sm"
-                  >
-                    Clear
-                  </button>
-                )}
+                {/* Custom dropdown arrow */}
+                <svg
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#3D1A00] pointer-events-none"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </div>
+              {selectedCategory && (
+                <button
+                  onClick={clearCategoryFilter}
+                  className="px-4 py-3 bg-[#3D1A00] text-white rounded-full hover:bg-orange-600 transition-colors font-semibold text-sm"
+                >
+                  Clear
+                </button>
+              )}
             </div>
           </div>
         </div>
 
         {/* Results info */}
         {filteredProducts.length > 0 && !loading && (
-          <p className="text-sm text-[#7A6A5A] mb-6">
+          <p className="text-sm text-[#7A6A5A] mb-3">
             Showing <span className="font-semibold text-[#3D1A00]">{indexOfFirstItem + 1}–{Math.min(indexOfLastItem, filteredProducts.length)}</span> of <span className="font-semibold text-[#3D1A00]">{filteredProducts.length}</span> products
           </p>
         )}
@@ -221,7 +220,7 @@ const ProductsPage = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {currentProducts.map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}
@@ -229,12 +228,12 @@ const ProductsPage = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="mt-12 flex justify-center">
+              <div className="mt-10 flex justify-center">
                 <nav className="flex items-center gap-2">
                   <button
                     onClick={() => goToPage(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`px-5 py-3 rounded-full transition-colors font-semibold text-sm ${
+                    className={`px-4 py-2 rounded-full transition-colors font-semibold text-sm ${
                       currentPage === 1
                         ? 'bg-orange-50 text-[#A8998A] cursor-not-allowed'
                         : 'bg-white border border-orange-200 text-[#3D1A00] hover:bg-orange-50'
@@ -255,10 +254,10 @@ const ProductsPage = () => {
                         if (prevPage && pageNum - prevPage > 1) {
                           return (
                             <React.Fragment key={`ellipsis-${pageNum}`}>
-                              <span className="px-3 py-3 text-[#A8998A]">...</span>
+                              <span className="px-2 py-2 text-[#A8998A]">...</span>
                               <button
                                 onClick={() => goToPage(pageNum)}
-                                className={`w-11 h-11 rounded-full font-semibold transition-colors ${
+                                className={`w-10 h-10 rounded-full font-semibold text-sm transition-colors ${
                                   currentPage === pageNum
                                     ? 'bg-orange-600 text-white'
                                     : 'bg-white border border-orange-200 text-[#3D1A00] hover:bg-orange-50'
@@ -273,7 +272,7 @@ const ProductsPage = () => {
                           <button
                             key={pageNum}
                             onClick={() => goToPage(pageNum)}
-                            className={`w-11 h-11 rounded-full font-semibold transition-colors ${
+                            className={`w-10 h-10 rounded-full font-semibold text-sm transition-colors ${
                               currentPage === pageNum
                                 ? 'bg-orange-600 text-white'
                                 : 'bg-white border border-orange-200 text-[#3D1A00] hover:bg-orange-50'
@@ -288,7 +287,7 @@ const ProductsPage = () => {
                   <button
                     onClick={() => goToPage(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className={`px-5 py-3 rounded-full transition-colors font-semibold text-sm ${
+                    className={`px-4 py-2 rounded-full transition-colors font-semibold text-sm ${
                       currentPage === totalPages
                         ? 'bg-orange-50 text-[#A8998A] cursor-not-allowed'
                         : 'bg-white border border-orange-200 text-[#3D1A00] hover:bg-orange-50'

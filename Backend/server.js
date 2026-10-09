@@ -14,6 +14,8 @@ import otpRoutes from './routes/otp.routes.js';
 import passwordRoutes from './routes/password.routes.js';
 import orderRoutes from './routes/order.routes.js';
 import paymentRoutes from './routes/paymentRoute.js';
+import subscriberRoutes from './routes/subscriber.routes.js';
+import dashboardRoutes from './routes/dashboard.routes.js';
 
 const app = express()
 
@@ -26,7 +28,14 @@ app.use(express.json())
 
 // CORS configuration
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://192.168.100.72:3001',
+    'http://192.168.56.1:3001',
+    'http://192.168.100.72:5000',
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -44,6 +53,9 @@ app.use('/api/otp', otpRoutes);
 app.use('/api/password', passwordRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/subscribers', subscriberRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+
 
 // Test route
 app.get('/api/test', (req, res) => {
@@ -74,7 +86,8 @@ const connectDB = async () => {
 connectDB()
 
 const PORT = process.env.PORT || 5000
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`)
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on http://0.0.0.0:${PORT}`)
+  console.log(`Network access: http://192.168.100.72:${PORT}`)
 })
 

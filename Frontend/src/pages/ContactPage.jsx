@@ -89,7 +89,7 @@ function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cream py-12 px-4">
+    <div className="min-h-screen bg-cream py-12 px-4 sm:px-6 lg:px-10 xl:px-16">
       <div className="container mx-auto max-w-6xl">
 
         {/* Header */}
@@ -109,7 +109,9 @@ function ContactPage() {
           </p>
         </div>
 
+        {/* ─── Two-column row: Form (left) + Info/Hours (right) ─── */}
         <div className="grid lg:grid-cols-2 gap-8">
+
           {/* Contact Form */}
           <div className="bg-white rounded-3xl p-6 md:p-8 border border-orange-100 shadow-soft">
             <div className="mb-6">
@@ -118,9 +120,7 @@ function ContactPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Name and Email Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Name Field */}
                 <div>
                   <label className="block text-[#3D1A00] text-sm font-semibold mb-2">
                     Full name <span className="text-red-500">*</span>
@@ -142,7 +142,6 @@ function ContactPage() {
                   )}
                 </div>
 
-                {/* Email Field */}
                 <div>
                   <label className="block text-[#3D1A00] text-sm font-semibold mb-2">
                     Email address <span className="text-red-500">*</span>
@@ -165,7 +164,6 @@ function ContactPage() {
                 </div>
               </div>
 
-              {/* Subject Field */}
               <div>
                 <label className="block text-[#3D1A00] text-sm font-semibold mb-2">
                   Subject <span className="text-red-500">*</span>
@@ -187,7 +185,6 @@ function ContactPage() {
                 )}
               </div>
 
-              {/* Message Field */}
               <div>
                 <label className="block text-[#3D1A00] text-sm font-semibold mb-2">
                   Message <span className="text-red-500">*</span>
@@ -209,7 +206,6 @@ function ContactPage() {
                 )}
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
@@ -235,9 +231,10 @@ function ContactPage() {
             </form>
           </div>
 
-          {/* Contact Info & Map */}
+          {/* Right column: Info + Business Hours */}
           <div className="space-y-6">
-            {/* Contact Info Cards */}
+
+            {/* Contact Info */}
             <div className="bg-white rounded-3xl p-6 md:p-8 border border-orange-100 shadow-soft">
               <h2 className="text-2xl font-bold text-[#3D1A00] mb-5">Contact information</h2>
               <div className="space-y-4">
@@ -284,31 +281,7 @@ function ContactPage() {
               </div>
             </div>
 
-            {/* Map Card */}
-            <div className="bg-white rounded-3xl p-4 border border-orange-100 shadow-soft overflow-hidden">
-              <div className="flex items-center gap-2 mb-3 px-2">
-                <span className="text-orange-600 text-lg">📍</span>
-                <h3 className="text-[#3D1A00] font-bold">Our location</h3>
-              </div>
-              <div className="rounded-2xl overflow-hidden">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1767.2323808906417!2d84.12138538848436!3d27.64108895483565!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3994503f3dc7db93%3A0x4364ac945539a147!2sHall%20Chok%2C%20Kawasoti%2033000!5e0!3m2!1sen!2snp!4v1780650078620!5m2!1sen!2snp"
-                  width="100%"
-                  height="280"
-                  style={{ border: 0, borderRadius: '12px' }}
-                  allowFullScreen={false}
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="MeroGadget Location Map"
-                  className="w-full"
-                />
-              </div>
-              <p className="text-[#7A6A5A] text-xs text-center mt-3">
-                Visit our store for in-person shopping and support
-              </p>
-            </div>
-
-            {/* Business Hours */}
+            {/* Business Hours — now in the right column */}
             <div className="bg-white rounded-3xl p-6 border border-orange-100 shadow-soft">
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-orange-600 text-lg">⏰</span>
@@ -329,8 +302,34 @@ function ContactPage() {
                 </div>
               </div>
             </div>
+
           </div>
         </div>
+
+        {/* ─── Full-width Map row (below both columns) ─── */}
+        <div className="mt-8 bg-white rounded-3xl p-4 sm:p-5 border border-orange-100 shadow-soft overflow-hidden">
+          <div className="flex items-center gap-2 mb-3 px-2">
+            <span className="text-orange-600 text-lg">📍</span>
+            <h3 className="text-[#3D1A00] font-bold">Our location</h3>
+          </div>
+          <div className="rounded-2xl overflow-hidden">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1767.2323808906417!2d84.12138538848436!3d27.64108895483565!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3994503f3dc7db93%3A0x4364ac945539a147!2sHall%20Chok%2C%20Kawasoti%2033000!5e0!3m2!1sen!2snp!4v1780650078620!5m2!1sen!2snp"
+              width="100%"
+              height="380"
+              style={{ border: 0 }}
+              allowFullScreen={false}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="MeroGadget Location Map"
+              className="w-full rounded-2xl block"
+            />
+          </div>
+          <p className="text-[#7A6A5A] text-xs text-center mt-3">
+            Visit our store for in-person shopping and support
+          </p>
+        </div>
+
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
+import api from '../../services/api';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -23,10 +23,7 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/auth/users', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get('/auth/users');
       setUsers(response.data.users || []);
     } catch (err) {
       error('Failed to fetch users');
@@ -36,10 +33,13 @@ const AdminUsers = () => {
     }
   };
 
-  const filteredUsers = users.filter(user =>
-    user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // ✅ Hide admins, then apply search filter
+  const filteredUsers = users
+    .filter(user => user.role !== 'admin')
+    .filter(user =>
+      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   const openRoleModal = (user) => {
     const newRoleValue = user.role === 'admin' ? 'user' : 'admin';
@@ -51,12 +51,7 @@ const AdminUsers = () => {
   const handleConfirmRoleChange = async () => {
     if (selectedUser) {
       try {
-        const token = localStorage.getItem('token');
-        await axios.put(
-          `http://localhost:5000/api/auth/users/${selectedUser._id}/role`,
-          { role: newRole },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await api.put(`/auth/users/${selectedUser._id}/role`, { role: newRole });
         success(`${selectedUser.name || selectedUser.email}'s role changed to ${newRole}`);
         fetchUsers();
       } catch (err) {
@@ -76,11 +71,7 @@ const AdminUsers = () => {
   const handleConfirmDelete = async () => {
     if (userToDelete) {
       try {
-        const token = localStorage.getItem('token');
-        await axios.delete(
-          `http://localhost:5000/api/auth/users/${userToDelete._id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await api.delete(`/auth/users/${userToDelete._id}`);
         success(`${userToDelete.name || userToDelete.email} deleted successfully`);
         fetchUsers();
       } catch (err) {
@@ -226,17 +217,7 @@ const AdminUsers = () => {
                           </svg>
                         </button>
 
-                        {user.email !== 'admin@example.com' && (
-                          <button
-                            onClick={() => openDeleteModal(user)}
-                            className="text-red-500 hover:text-red-600 transition-colors p-2 rounded-full hover:bg-red-50"
-                            title="Delete User"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        )}
+                       
                       </div>
                     </td>
                   </tr>
@@ -259,17 +240,7 @@ const AdminUsers = () => {
         type="warning"
       />
 
-      {/* Delete Modal */}
-      <Modal
-        isOpen={deleteModalOpen}
-        onClose={handleCancelDeleteModal}
-        onConfirm={handleConfirmDelete}
-        title="Delete User"
-        message={`Are you sure you want to delete "${userToDelete?.name || userToDelete?.email}"? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Cancel"
-        type="danger"
-      />
+     
     </div>
   );
 };
