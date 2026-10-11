@@ -29,19 +29,38 @@ app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 // CORS configuration
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://192.168.100.72:3001',
+  'http://192.168.56.1:3001',
+  'http://192.168.100.72:5000',
+  'https://merogadget-ecommerce.vercel.app',
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL.replace(/\/$/, '')] : []),
+]
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://192.168.100.72:3001',
-    'http://192.168.56.1:3001',
-    'http://192.168.100.72:5000',
-  ],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, curl, Postman)
+    if (!origin) return callback(null, true)
+
+    const isAllowed =
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.vercel.app')
+
+    if (isAllowed) {
+      return callback(null, true)
+    }
+    return callback(null, false)
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
 }))
+
+// Handle preflight requests
+app.options('*', cors())
 
 
 
@@ -75,19 +94,41 @@ app.use((err, req, res, next) => {
 })
 
 // MongoDB connection
+let isConnected = false
 const connectDB = async () => {
+  if (isConnected || mongoose.connection.readyState >= 1) {
+    return
+  }
   try {
-    await mongoose.connect(process.env.MONGO_URI  || 'mongodb://localhost:27017/test')
+    const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/test')
+    isConnected = !!conn.connections[0].readyState
     console.log('MongoDB Connected')
   } catch (error) {
     console.error('MongoDB connection error:', error)
-    process.exit(1)
+    if (!process.env.VERCEL) {
+      process.exit(1)
+    }
   }
 }
 
 connectDB()
 
-const PORT = process.env.PORT || 5000
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`)
+// Middleware to ensure DB connection in serverless environments
+app.use(async (req, res, next) => {
+  try {
+    await connectDB()
+    next()
+  } catch (err) {
+    console.error('Database connection error in middleware:', err)
+    next(err)
+  }
 })
+
+const PORT = process.env.PORT || 5000
+if (!process.env.VERCEL) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on http://0.0.0.0:${PORT}`)
+  })
+}
+
+export default app
