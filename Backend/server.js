@@ -59,19 +59,50 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
 }))
 
-// Routes
-app.use('/api/auth', authRoutes)
-app.use('/api/cart', cartRoutes)
-app.use('/api/products', productRoutes)
-app.use('/api/categories', categoryRoutes); 
-app.use('/api/contact', contactRoutes)
-app.use('/api/otp', otpRoutes);
-app.use('/api/password', passwordRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/payment', paymentRoutes);
-app.use('/api/subscribers', subscriberRoutes);
-app.use('/api/dashboard', dashboardRoutes);
+// MongoDB connection for Serverless & Local
+let isConnected = false
+const connectDB = async () => {
+  if (mongoose.connection.readyState === 1) {
+    return
+  }
+  if (!process.env.MONGO_URI) {
+    console.error('CRITICAL: MONGO_URI is not set in environment variables!')
+    throw new Error('MONGO_URI is missing in environment variables')
+  }
+  try {
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 8000
+    })
+    isConnected = !!conn.connections[0].readyState
+    console.log('MongoDB Connected')
+  } catch (error) {
+    console.error('MongoDB connection error:', error.message)
+    throw error
+  }
+}
 
+// Initial connection attempt on cold start
+connectDB().catch(err => console.error('Initial DB connect attempt failed:', err.message))
+
+// Middleware to ensure DB connection before handling API routes
+app.use(async (req, res, next) => {
+  // Allow health/root checks without waiting for DB
+  if (req.path === '/' || req.path === '/api' || req.path === '/api/test') {
+    return next()
+  }
+  try {
+    await connectDB()
+    next()
+  } catch (err) {
+    console.error('DB middleware error:', err.message)
+    return res.status(500).json({
+      success: false,
+      message: 'Database connection failed',
+      error: err.message,
+      hint: !process.env.MONGO_URI ? 'MONGO_URI is missing from Vercel environment variables' : 'Check MongoDB Atlas Network Access whitelist (0.0.0.0/0)'
+    })
+  }
+})
 
 // Root & health check routes
 app.get('/', (req, res) => {
@@ -89,10 +120,34 @@ app.get('/api', (req, res) => {
   })
 })
 
+app.get('/api/health', (req, res) => {
+  const dbState = mongoose.connection.readyState
+  const states = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' }
+  res.json({
+    success: true,
+    message: 'API is healthy',
+    database: states[dbState] || 'unknown',
+    mongoUriConfigured: !!process.env.MONGO_URI
+  })
+})
+
 // Test route
 app.get('/api/test', (req, res) => {
   res.json({ message: 'API is working' })
 })
+
+// API Routes
+app.use('/api/auth', authRoutes)
+app.use('/api/cart', cartRoutes)
+app.use('/api/products', productRoutes)
+app.use('/api/categories', categoryRoutes)
+app.use('/api/contact', contactRoutes)
+app.use('/api/otp', otpRoutes)
+app.use('/api/password', passwordRoutes)
+app.use('/api/orders', orderRoutes)
+app.use('/api/payment', paymentRoutes)
+app.use('/api/subscribers', subscriberRoutes)
+app.use('/api/dashboard', dashboardRoutes)
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -102,37 +157,6 @@ app.use((err, req, res, next) => {
     message: 'Something went wrong',
     error: err.message
   })
-})
-
-// MongoDB connection
-let isConnected = false
-const connectDB = async () => {
-  if (isConnected || mongoose.connection.readyState >= 1) {
-    return
-  }
-  try {
-    const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/test')
-    isConnected = !!conn.connections[0].readyState
-    console.log('MongoDB Connected')
-  } catch (error) {
-    console.error('MongoDB connection error:', error)
-    if (!process.env.VERCEL) {
-      process.exit(1)
-    }
-  }
-}
-
-connectDB()
-
-// Middleware to ensure DB connection in serverless environments
-app.use(async (req, res, next) => {
-  try {
-    await connectDB()
-    next()
-  } catch (err) {
-    console.error('Database connection error in middleware:', err)
-    next(err)
-  }
 })
 
 const PORT = process.env.PORT || 5000
