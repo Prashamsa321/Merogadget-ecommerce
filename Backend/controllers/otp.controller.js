@@ -24,7 +24,7 @@ export const sendRegistrationOTP = async (req, res) => {
     }
 
     // Check if user already exists
-    const User = (await import('../models/User.js')).default;
+    const User = (await import('../models/user.js')).default;
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({

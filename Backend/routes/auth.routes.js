@@ -9,7 +9,7 @@ import {
   updateUserRole,
   deleteUser
 } from '../controllers/auth.controller.js';
-import User from '../models/User.js';
+import User from '../models/user.js';
 
 const router = express.Router();
 

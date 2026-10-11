@@ -1,4 +1,4 @@
-import User from '../models/User.js';
+import User from '../models/user.js';
 import Order from '../models/Order.js';
 import Product from '../models/product.js';
 import Subscriber from '../models/Subscriber.js';
