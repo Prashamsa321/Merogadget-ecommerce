@@ -59,11 +59,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
 }))
 
-// Handle preflight requests
-app.options('*', cors())
-
-
-
 // Routes
 app.use('/api/auth', authRoutes)
 app.use('/api/cart', cartRoutes)
