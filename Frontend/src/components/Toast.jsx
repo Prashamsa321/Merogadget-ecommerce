@@ -51,8 +51,8 @@ const Toast = ({ message, type, onClose }) => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 animate-slide-up">
-      <div className={`${styles.bg} ${styles.shadow} border ${styles.border} px-5 py-4 rounded-2xl flex items-center gap-3 min-w-[320px] max-w-md`}>
+    <div className="fixed top-20 right-6 z-[60] animate-slide-up w-[calc(100%-2rem)] max-w-md">
+      <div className={`${styles.bg} ${styles.shadow} border ${styles.border} px-5 py-4 rounded-2xl flex items-center gap-3 w-full`}>
         <div className={`w-8 h-8 rounded-full ${styles.iconBg} flex items-center justify-center flex-shrink-0`}>
           <span className={`text-sm font-bold ${styles.iconColor}`}>{styles.icon}</span>
         </div>

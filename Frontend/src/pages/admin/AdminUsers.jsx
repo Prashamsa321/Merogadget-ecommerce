@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 import api from '../../services/api';
+import { Search } from 'lucide-react';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -33,7 +34,6 @@ const AdminUsers = () => {
     }
   };
 
-  // ✅ Hide admins, then apply search filter
   const filteredUsers = users
     .filter(user => user.role !== 'admin')
     .filter(user =>
@@ -116,29 +116,28 @@ const AdminUsers = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <p className="eyebrow mb-1">Community</p>
-          <h1 className="text-2xl md:text-3xl font-bold text-[#3D1A00]">Users Management</h1>
-          <p className="text-[#7A6A5A] mt-1 text-sm">Manage your store users and their roles</p>
-        </div>
-        <div className="text-sm text-[#7A6A5A]">
-          Total: <span className="text-[#3D1A00] font-bold">{filteredUsers.length}</span> users
-        </div>
-      </div>
 
-      {/* Search */}
-      <div className="bg-white rounded-2xl shadow-soft p-5 border border-orange-100">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search users by name or email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-3 pl-10 bg-cream border border-orange-100 rounded-full text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-          />
-          <span className="absolute left-3.5 top-3.5 text-[#A8998A]">🔍</span>
+      {/* Header + Search */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex-shrink-0 text-center md:text-left">
+          <p className="eyebrow mb-1 text-xs">Community</p>
+          <h1 className="text-xl md:text-2xl font-bold text-[#3D1A00]">Users Management</h1>
+          <p className="text-xs text-[#7A6A5A] mt-0.5">
+            Total: <span className="font-bold text-[#3D1A00]">{filteredUsers.length}</span> users
+          </p>
+        </div>
+
+        <div className="w-full md:w-auto flex items-center gap-3 bg-white rounded-2xl p-3 border border-orange-100 shadow-soft">
+          <div className="w-full sm:w-64 md:w-72 relative">
+            <input
+              type="text"
+              placeholder="Search users by name or email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-2 pl-10 bg-cream border border-orange-100 rounded-full text-sm text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+            />
+            <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-[#A8998A]" />
+          </div>
         </div>
       </div>
 
@@ -159,12 +158,11 @@ const AdminUsers = () => {
               {filteredUsers.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-12 text-center text-[#7A6A5A]">
-                    <div className="text-5xl mb-3">👥</div>
                     <p className="font-semibold text-[#3D1A00]">No users found</p>
                     {searchTerm && (
                       <button
                         onClick={() => setSearchTerm('')}
-                        className="mt-2 text-orange-600 hover:text-orange-700 transition-colors font-semibold"
+                        className="mt-2 text-orange-600 hover:text-orange-700 transition-colors font-semibold text-sm"
                       >
                         Clear search
                       </button>
@@ -192,12 +190,10 @@ const AdminUsers = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       {user.role === 'admin' ? (
                         <span className="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-purple-50 text-purple-700 border border-purple-100">
-                          <span className="mr-1">👑</span>
                           admin
                         </span>
                       ) : (
                         <span className="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-                          <span className="mr-1">👤</span>
                           user
                         </span>
                       )}
@@ -216,8 +212,6 @@ const AdminUsers = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
                         </button>
-
-                       
                       </div>
                     </td>
                   </tr>
@@ -240,7 +234,6 @@ const AdminUsers = () => {
         type="warning"
       />
 
-     
     </div>
   );
 };

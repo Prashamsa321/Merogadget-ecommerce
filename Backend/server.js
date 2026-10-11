@@ -24,7 +24,9 @@ app.use(cookieParser());
 
 dotenv.config()
 
-app.use(express.json())
+// Increased limit to handle base64 image uploads (profile photo, product image)
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 // CORS configuration
 app.use(cors({
@@ -88,6 +90,4 @@ connectDB()
 const PORT = process.env.PORT || 5000
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`)
-  console.log(`Network access: http://192.168.100.72:${PORT}`)
 })
-

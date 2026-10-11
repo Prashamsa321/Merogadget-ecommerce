@@ -1,6 +1,6 @@
 import Order from '../models/Order.js';
 import Cart from '../models/cart.js';
-import Product from '../models/Product.js';
+import Product from '../models/product.js';
 
 // Create new order (from cart — used by Khalti flow if needed)
 export const createOrder = async (req, res) => {
@@ -25,7 +25,7 @@ export const createOrder = async (req, res) => {
     }));
 
     const order = new Order({
-      userId,                                     // ✅ was "user"
+      userId,
       items: orderItems,
       totalAmount: Number(cart.totalAmount) || 0,
       shippingAddress: {
@@ -39,8 +39,8 @@ export const createOrder = async (req, res) => {
       },
       paymentMethod: paymentMethod || 'COD',
       notes: notes || '',
-      orderStatus: 'Pending',                    // ✅ capitalized
-      paymentStatus: 'Pending',                  // ✅ capitalized
+      orderStatus: 'Pending',
+      paymentStatus: 'Pending',
       statusHistory: [{
         status: 'Pending',
         comment: 'Order placed successfully',
@@ -50,7 +50,6 @@ export const createOrder = async (req, res) => {
 
     await order.save();
 
-    // Clear cart
     cart.items = [];
     cart.totalAmount = 0;
     await cart.save();
@@ -70,7 +69,7 @@ export const createOrder = async (req, res) => {
   }
 };
 
-// ✅ NEW — Cash on Delivery order (from checkout page)
+// Cash on Delivery order (from checkout page)
 export const createCODOrder = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -116,7 +115,6 @@ export const createCODOrder = async (req, res) => {
 
     await order.save();
 
-    // Clear cart
     const cart = await Cart.findOne({ userId });
     if (cart) {
       cart.items = [];
@@ -175,7 +173,7 @@ export const getAllOrders = async (req, res) => {
 export const getUserOrders = async (req, res) => {
   try {
     const userId = req.user._id;
-    const orders = await Order.find({ userId }).sort({ createdAt: -1 });  // ✅ userId
+    const orders = await Order.find({ userId }).sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -232,6 +230,9 @@ export const updateOrderStatus = async (req, res) => {
       });
     }
 
+    // Capture the previous status BEFORE changing it
+    const previousStatus = order.orderStatus;
+
     if (orderStatus) {
       order.orderStatus = orderStatus;
       order.statusHistory.push({
@@ -246,6 +247,28 @@ export const updateOrderStatus = async (req, res) => {
     if (estimatedDelivery) order.estimatedDelivery = estimatedDelivery;
 
     await order.save();
+
+    // Deduct product stock on the FIRST transition to "Delivered"
+    if (orderStatus === 'Delivered' && previousStatus !== 'Delivered') {
+      try {
+        for (const item of order.items) {
+          if (!item.productId) continue;
+
+          await Product.findByIdAndUpdate(
+            item.productId,
+            { $inc: { stock: -Math.abs(Number(item.quantity) || 0) } }
+          );
+        }
+
+        console.log(`Stock deducted for order ${order.orderNumber} (${order.items.length} items)`);
+      } catch (stockErr) {
+        console.error('Stock deduction error:', stockErr);
+        // Order status is already saved — we log and continue.
+        // Admin can manually adjust stock if needed.
+      }
+    }
+
+    await order.populate('userId', 'name email');
 
     res.status(200).json({
       success: true,

@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import api from '../services/api';
 
 const ProfilePage = () => {
-  const { user, token, isAuthenticated, loading: authLoading } = useAuth();
+  const { user, token, isAuthenticated, loading: authLoading, updateUser, setUser } = useAuth();
   const { success, error } = useToast();
 
   const [loading, setLoading] = useState(false);
@@ -14,7 +14,8 @@ const ProfilePage = () => {
     name: '',
     email: '',
     phone: '',
-    address: ''
+    address: '',
+    photo: ''
   });
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -22,20 +23,26 @@ const ProfilePage = () => {
     confirmPassword: ''
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
-
-  console.log('ProfilePage - authLoading:', authLoading);
-  console.log('ProfilePage - isAuthenticated:', isAuthenticated);
-  console.log('ProfilePage - user:', user);
-  console.log('ProfilePage - token:', token);
+  const originalPhoto = useRef('');
+  const originalData = useRef({ name: '', phone: '', address: '' });
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (user) {
+      const initialPhoto = user.photo || '';
       setFormData({
         name: user.name || '',
         email: user.email || '',
         phone: user.phone || '',
-        address: user.address || ''
+        address: user.address || '',
+        photo: initialPhoto
       });
+      originalPhoto.current = initialPhoto;
+      originalData.current = {
+        name: user.name || '',
+        phone: user.phone || '',
+        address: user.address || ''
+      };
     }
   }, [user]);
 
@@ -49,16 +56,73 @@ const ProfilePage = () => {
     setPasswordData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      error('Image must be less than 10MB');
+      e.target.value = '';
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      error('File must be an image');
+      e.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData(prev => ({ ...prev, photo: reader.result }));
+      if (!isEditing) setIsEditing(true);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleRemovePhoto = () => {
+    setFormData(prev => ({ ...prev, photo: '' }));
+    if (!isEditing) setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setFormData(prev => ({
+      ...prev,
+      name: originalData.current.name,
+      phone: originalData.current.phone,
+      address: originalData.current.address,
+      photo: originalPhoto.current
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      await api.put('/auth/updateprofile', formData);
+      const response = await api.put('/auth/updateprofile', formData);
+
+      if (response.data?.user) {
+        if (typeof updateUser === 'function') {
+          updateUser(response.data.user);
+        } else {
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+          if (typeof setUser === 'function') setUser(response.data.user);
+        }
+      }
+
+      originalPhoto.current = formData.photo;
+      originalData.current = {
+        name: formData.name,
+        phone: formData.phone,
+        address: formData.address
+      };
       success('Profile updated successfully');
       setIsEditing(false);
     } catch (err) {
-      error('Failed to update profile');
+      error(err.response?.data?.message || 'Failed to update profile');
     } finally {
       setLoading(false);
     }
@@ -71,7 +135,6 @@ const ProfilePage = () => {
       error('Please login again to change password');
       return;
     }
-
     if (!passwordData.currentPassword) {
       error('Please enter your current password');
       return;
@@ -92,17 +155,13 @@ const ProfilePage = () => {
     setPasswordLoading(true);
     try {
       const response = await api.put('/auth/change-password', {
-          currentPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword
-        });
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
 
       if (response.data.success) {
         success(response.data.message || 'Password changed successfully!');
-        setPasswordData({
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: ''
-        });
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
         setShowChangePassword(false);
       }
     } catch (err) {
@@ -111,9 +170,7 @@ const ProfilePage = () => {
 
       if (err.response?.status === 401) {
         error('Session expired. Please login again.');
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 2000);
+        setTimeout(() => { window.location.href = '/login'; }, 2000);
       }
     } finally {
       setPasswordLoading(false);
@@ -136,8 +193,10 @@ const ProfilePage = () => {
       <div className="min-h-screen bg-cream py-16 px-4 sm:px-6 lg:px-10 xl:px-16">
         <div className="container mx-auto max-w-xl">
           <div className="bg-white rounded-3xl border border-orange-100 shadow-soft p-10 text-center">
-            <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center text-4xl mx-auto mb-5">
-              🔒
+            <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-5">
+              <svg className="w-10 h-10 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
             </div>
             <h2 className="text-2xl font-bold text-[#3D1A00] mb-2">Not logged in</h2>
             <p className="text-[#7A6A5A] mb-6">Please login to view your profile</p>
@@ -153,297 +212,312 @@ const ProfilePage = () => {
     );
   }
 
+  const displayPhoto = formData.photo || '';
+  const initial = formData.name?.charAt(0)?.toUpperCase() || 'U';
+  const memberSince = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    : 'Recently';
+
   return (
-    <div className="min-h-screen bg-cream py-12 px-4 sm:px-6 lg:px-10 xl:px-16">
-      <div className="container mx-auto max-w-4xl">
+    <div className="min-h-screen bg-cream py-10 px-4 sm:px-6 lg:px-10 xl:px-16">
+      <div className="container mx-auto max-w-5xl">
 
         {/* Header */}
-        <div className="mb-10">
-          <p className="eyebrow mb-2">My account</p>
-          <h1 className="text-4xl md:text-5xl font-bold text-[#3D1A00] mb-3">Profile</h1>
-          <p className="text-[#7A6A5A]">Manage your personal information</p>
+        <div className="mb-6">
+          <p className="eyebrow mb-1">Account</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#3D1A00]">My Profile</h1>
+          <p className="text-[#7A6A5A] mt-1 text-sm">Manage your personal information and photo</p>
         </div>
 
-        {/* Profile Card */}
-        <div className="bg-white rounded-3xl border border-orange-100 shadow-soft overflow-hidden">
+        {/* Top Card — Avatar + Identity */}
+        <div className="bg-white rounded-3xl shadow-soft border border-orange-100 overflow-hidden mb-5">
+          <div className="px-6 md:px-8 py-6">
+            <div className="flex flex-col md:flex-row md:items-center gap-5 md:gap-6">
 
-          {/* Card Header */}
-          <div className="bg-gradient-to-r from-[#3D1A00] to-[#5C3317] px-6 py-5">
-            <div className="flex flex-wrap justify-between items-center gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 bg-white/10 rounded-2xl flex items-center justify-center">
-                  <svg className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
+              {/* Avatar */}
+              <div className="flex-shrink-0 self-center md:self-auto">
+                <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-orange-100 shadow-lg shadow-orange-500/10 bg-gradient-to-br from-orange-500 to-[#C2410C] flex items-center justify-center">
+                  {displayPhoto ? (
+                    <img
+                      src={displayPhoto}
+                      alt={formData.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  ) : (
+                    <span className="text-white text-4xl font-bold">{initial}</span>
+                  )}
                 </div>
-                <h2 className="text-xl font-bold text-white">Profile information</h2>
               </div>
-              <div className="flex gap-3">
-                {!isEditing && (
-                  <button
-                    onClick={() => setShowChangePassword(!showChangePassword)}
-                    className="flex items-center gap-2 px-4 py-2 bg-white/10 text-white rounded-full hover:bg-orange-600 transition-all duration-300 text-sm font-semibold"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                    Password
-                  </button>
-                )}
-                {!isEditing && (
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-full hover:bg-orange-700 transition-all duration-300 text-sm font-semibold"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Edit
-                  </button>
+
+              {/* Identity */}
+              <div className="flex-1 min-w-0 text-center md:text-left">
+                <h2 className="text-xl md:text-2xl font-bold text-[#3D1A00] truncate">
+                  {formData.name || 'User'}
+                </h2>
+                <p className="text-sm text-[#7A6A5A] break-all mt-0.5">{formData.email}</p>
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-3">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 text-[10px] font-bold rounded-full bg-orange-50 text-orange-700 border border-orange-100 uppercase tracking-wider">
+                    {user?.role || 'user'}
+                  </span>
+                  <span className="text-xs text-[#A8998A]">Member since {memberSince}</span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex flex-wrap justify-center md:justify-end gap-2 self-center md:self-auto">
+                {!isEditing ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        setShowChangePassword(!showChangePassword);
+                        if (isEditing) setIsEditing(false);
+                      }}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 bg-cream border border-orange-200 text-[#3D1A00] rounded-full hover:bg-orange-50 transition-all duration-300 text-sm font-bold"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                      Password
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsEditing(true);
+                        setShowChangePassword(false);
+                      }}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-orange-600 text-white rounded-full hover:bg-orange-700 transition-all duration-300 text-sm font-bold shadow-lg shadow-orange-500/20"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Edit Profile
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-600 text-white rounded-full hover:bg-orange-700 transition-all duration-300 text-sm font-bold shadow-lg shadow-orange-500/20"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5m0 0l5 5m-5-5v12" />
+                      </svg>
+                      {displayPhoto ? 'Change' : 'Upload'}
+                    </button>
+
+                    {displayPhoto && (
+                      <button
+                        type="button"
+                        onClick={handleRemovePhoto}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 rounded-full hover:bg-red-100 border border-red-100 transition-all duration-300 text-sm font-bold"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Remove
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             </div>
-          </div>
 
-          {/* Change Password Section */}
-          {showChangePassword && !isEditing && (
-            <div className="p-6 md:p-8 border-b border-orange-100 bg-orange-50/40">
-              <h3 className="text-lg font-bold text-[#3D1A00] mb-5 flex items-center gap-2">
-                <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                Change password
-              </h3>
-              <form onSubmit={handleChangePassword} className="space-y-4">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+          </div>
+        </div>
+
+        {/* Change Password Card */}
+        {showChangePassword && !isEditing && (
+          <div className="bg-white rounded-3xl shadow-soft border border-orange-100 overflow-hidden mb-5">
+            <div className="px-6 md:px-8 py-5 border-b border-orange-100">
+              <h3 className="text-base font-bold text-[#3D1A00]">Change Password</h3>
+              <p className="text-xs text-[#A8998A] mt-0.5">Update your account password</p>
+            </div>
+            <form onSubmit={handleChangePassword} className="p-6 md:p-8 space-y-5">
+              <div>
+                <label className="block text-xs font-bold text-[#A8998A] uppercase tracking-widest mb-2">Current Password</label>
+                <input
+                  type="password"
+                  name="currentPassword"
+                  value={passwordData.currentPassword}
+                  onChange={handlePasswordChange}
+                  className="w-full px-4 py-3 bg-cream border border-orange-100 rounded-xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
+                  placeholder="Enter current password"
+                  required
+                />
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-[#3D1A00] mb-2">Current password</label>
+                  <label className="block text-xs font-bold text-[#A8998A] uppercase tracking-widest mb-2">New Password</label>
                   <input
                     type="password"
-                    name="currentPassword"
-                    value={passwordData.currentPassword}
+                    name="newPassword"
+                    value={passwordData.newPassword}
                     onChange={handlePasswordChange}
-                    className="w-full px-4 py-3 bg-white border border-orange-100 rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                    placeholder="Enter current password"
+                    className="w-full px-4 py-3 bg-cream border border-orange-100 rounded-xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
+                    placeholder="At least 6 characters"
                     required
                   />
                 </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-[#3D1A00] mb-2">New password</label>
-                    <input
-                      type="password"
-                      name="newPassword"
-                      value={passwordData.newPassword}
-                      onChange={handlePasswordChange}
-                      className="w-full px-4 py-3 bg-white border border-orange-100 rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                      placeholder="At least 6 characters"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-[#3D1A00] mb-2">Confirm new password</label>
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      value={passwordData.confirmPassword}
-                      onChange={handlePasswordChange}
-                      className="w-full px-4 py-3 bg-white border border-orange-100 rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                      placeholder="Repeat new password"
-                      required
-                    />
-                  </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#A8998A] uppercase tracking-widest mb-2">Confirm Password</label>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={passwordData.confirmPassword}
+                    onChange={handlePasswordChange}
+                    className="w-full px-4 py-3 bg-cream border border-orange-100 rounded-xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
+                    placeholder="Repeat new password"
+                    required
+                  />
                 </div>
-                <div className="flex gap-3 pt-2">
-                  <button
-                    type="submit"
-                    disabled={passwordLoading}
-                    className="flex-1 bg-orange-600 text-white py-3 rounded-full font-semibold hover:bg-orange-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {passwordLoading ? (
-                      <>
-                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                        Changing...
-                      </>
-                    ) : 'Update password'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowChangePassword(false);
-                      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-                    }}
-                    className="flex-1 bg-cream border border-orange-200 text-[#3D1A00] py-3 rounded-full font-semibold hover:bg-orange-50 transition-all"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={passwordLoading}
+                  className="flex-1 sm:flex-initial sm:min-w-[180px] bg-orange-600 text-white py-3 rounded-full font-bold hover:bg-orange-700 transition-all duration-300 disabled:opacity-50 shadow-lg shadow-orange-500/20"
+                >
+                  {passwordLoading ? 'Updating...' : 'Update Password'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowChangePassword(false);
+                    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                  }}
+                  className="flex-1 sm:flex-initial sm:min-w-[140px] bg-white border border-orange-200 text-[#3D1A00] py-3 rounded-full font-bold hover:bg-orange-50 transition-all duration-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
-          {/* Form Body */}
-          <form onSubmit={handleSubmit} className="p-6 md:p-8">
-            <div className="space-y-5">
-              {/* Full Name */}
-              <div>
-                <label className="block text-sm font-semibold text-[#3D1A00] mb-2">Full name</label>
+        {/* Details Card */}
+        <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-soft border border-orange-100 overflow-hidden">
+
+          <div className="px-6 md:px-8 py-5 border-b border-orange-100">
+            <h3 className="text-base font-bold text-[#3D1A00]">Personal Information</h3>
+            <p className="text-xs text-[#A8998A] mt-0.5">
+              {isEditing ? 'Editing — update the fields below' : 'View your account details'}
+            </p>
+          </div>
+
+          <div className="divide-y divide-orange-50">
+
+            {/* Full Name */}
+            <div className="px-6 md:px-8 py-5 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-3 md:gap-6 items-start md:items-center">
+              <label className="text-xs font-bold text-[#A8998A] uppercase tracking-widest">
+                Full Name
+              </label>
+              {isEditing ? (
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  disabled={!isEditing}
-                  className={`w-full px-4 py-3 border rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all ${
-                    !isEditing
-                      ? 'bg-orange-50/50 border-orange-100 cursor-not-allowed'
-                      : 'bg-cream border-orange-100 hover:border-orange-300'
-                  }`}
+                  className="w-full px-4 py-2.5 bg-cream border border-orange-100 rounded-xl text-[#3D1A00] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
                   placeholder="Enter your full name"
                 />
-              </div>
+              ) : (
+                <p className="text-[#3D1A00] font-semibold">{formData.name || '—'}</p>
+              )}
+            </div>
 
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-semibold text-[#3D1A00] mb-2">Email address</label>
-                <div className="relative">
-                  <input
-                    type="email"
-                    value={formData.email}
-                    disabled
-                    className="w-full px-4 py-3 bg-orange-50/50 border border-orange-100 rounded-2xl text-[#7A6A5A] cursor-not-allowed"
-                  />
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                    <svg className="w-5 h-5 text-[#A8998A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  </div>
-                </div>
-                <p className="text-xs text-[#A8998A] mt-1.5">Email cannot be changed</p>
+            {/* Email */}
+            <div className="px-6 md:px-8 py-5 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-3 md:gap-6 items-start md:items-center">
+              <label className="text-xs font-bold text-[#A8998A] uppercase tracking-widest">
+                Email
+              </label>
+              <div className="flex items-center gap-2 min-w-0">
+                <p className="text-[#3D1A00] font-semibold break-all">{formData.email}</p>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-50 text-orange-600 text-[10px] font-bold rounded-full border border-orange-100 uppercase tracking-wider flex-shrink-0">
+                  Locked
+                </span>
               </div>
+            </div>
 
-              {/* Phone */}
-              <div>
-                <label className="block text-sm font-semibold text-[#3D1A00] mb-2">Phone number</label>
+            {/* Phone */}
+            <div className="px-6 md:px-8 py-5 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-3 md:gap-6 items-start md:items-center">
+              <label className="text-xs font-bold text-[#A8998A] uppercase tracking-widest">
+                Phone
+              </label>
+              {isEditing ? (
                 <input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  disabled={!isEditing}
                   placeholder="Enter phone number"
-                  className={`w-full px-4 py-3 border rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all ${
-                    !isEditing
-                      ? 'bg-orange-50/50 border-orange-100 cursor-not-allowed'
-                      : 'bg-cream border-orange-100 hover:border-orange-300'
-                  }`}
+                  className="w-full px-4 py-2.5 bg-cream border border-orange-100 rounded-xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
                 />
-              </div>
+              ) : (
+                <p className="text-[#3D1A00] font-semibold">{formData.phone || '—'}</p>
+              )}
+            </div>
 
-              {/* Address */}
-              <div>
-                <label className="block text-sm font-semibold text-[#3D1A00] mb-2">Address</label>
+            {/* Address */}
+            <div className="px-6 md:px-8 py-5 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-3 md:gap-6 items-start">
+              <label className="text-xs font-bold text-[#A8998A] uppercase tracking-widest md:pt-2.5">
+                Address
+              </label>
+              {isEditing ? (
                 <textarea
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
-                  disabled={!isEditing}
                   rows="3"
                   placeholder="Enter your address"
-                  className={`w-full px-4 py-3 border rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all resize-none ${
-                    !isEditing
-                      ? 'bg-orange-50/50 border-orange-100 cursor-not-allowed'
-                      : 'bg-cream border-orange-100 hover:border-orange-300'
-                  }`}
+                  className="w-full px-4 py-2.5 bg-cream border border-orange-100 rounded-xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all resize-none"
                 />
-              </div>
-
-              {/* Buttons */}
-              {isEditing && (
-                <div className="flex gap-3 pt-6 border-t border-orange-100">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 bg-orange-600 text-white py-3 rounded-full font-semibold hover:bg-orange-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <>
-                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        Save changes
-                      </>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsEditing(false)}
-                    className="flex-1 bg-cream border border-orange-200 text-[#3D1A00] py-3 rounded-full font-semibold hover:bg-orange-50 transition-all"
-                  >
-                    Cancel
-                  </button>
-                </div>
+              ) : (
+                <p className="text-[#3D1A00] font-semibold whitespace-pre-wrap">
+                  {formData.address || '—'}
+                </p>
               )}
             </div>
-          </form>
-        </div>
 
-        {/* Account Stats */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-2xl p-5 border border-orange-100">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 bg-orange-50 rounded-2xl flex items-center justify-center">
-                <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-xs text-[#A8998A] uppercase tracking-widest font-semibold">Account type</p>
-                <p className="text-[#3D1A00] font-bold capitalize">{user?.role || 'User'}</p>
-              </div>
+            {/* Account Type */}
+            <div className="px-6 md:px-8 py-5 grid grid-cols-1 md:grid-cols-[200px_1fr] gap-3 md:gap-6 items-start md:items-center">
+              <label className="text-xs font-bold text-[#A8998A] uppercase tracking-widest">
+                Account Type
+              </label>
+              <span className="inline-flex items-center w-fit px-3 py-1 text-xs font-bold rounded-full bg-orange-50 text-orange-700 border border-orange-100 uppercase tracking-wider">
+                {user?.role || 'user'}
+              </span>
             </div>
+
           </div>
 
-          <div className="bg-white rounded-2xl p-5 border border-orange-100">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 bg-green-50 rounded-2xl flex items-center justify-center">
-                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-xs text-[#A8998A] uppercase tracking-widest font-semibold">Member since</p>
-                <p className="text-[#3D1A00] font-bold">
-                  {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'N/A'}
-                </p>
-              </div>
+          {/* Actions */}
+          {isEditing && (
+            <div className="px-6 md:px-8 py-5 border-t border-orange-100 bg-[#FFF4E6]/50 flex flex-col sm:flex-row gap-3">
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 sm:flex-initial sm:min-w-[180px] bg-orange-600 text-white py-3 rounded-full font-bold hover:bg-orange-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/20"
+              >
+                {loading ? 'Saving...' : 'Save Changes'}
+              </button>
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="flex-1 sm:flex-initial sm:min-w-[140px] bg-white border border-orange-200 text-[#3D1A00] py-3 rounded-full font-bold hover:bg-orange-50 transition-all duration-300"
+              >
+                Cancel
+              </button>
             </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-5 border border-orange-100">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 bg-blue-50 rounded-2xl flex items-center justify-center">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-xs text-[#A8998A] uppercase tracking-widest font-semibold">Orders</p>
-                <p className="text-[#3D1A00] font-bold">View History</p>
-              </div>
-            </div>
-          </div>
-        </div>
+          )}
+        </form>
       </div>
     </div>
   );

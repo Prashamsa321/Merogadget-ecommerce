@@ -23,8 +23,7 @@ const CreateProductPage = () => {
     images: ['']
   });
 
-  // ✅ For file uploads
-  const [imageMode, setImageMode] = useState('url'); // 'url' | 'upload'
+  const [imageMode, setImageMode] = useState('url');
 
   useEffect(() => {
     fetchCategories();
@@ -63,7 +62,6 @@ const CreateProductPage = () => {
         images: product.images && product.images.length > 0 ? product.images : ['']
       });
 
-      // If existing image is base64 data URL → set upload mode
       if (product.images?.[0]?.startsWith('data:')) {
         setImageMode('upload');
       }
@@ -93,18 +91,15 @@ const CreateProductPage = () => {
     }));
   };
 
-  // ✅ Handle file upload → convert to base64
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Check size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
       error('Image must be less than 2MB');
       return;
     }
 
-    // Check type
     if (!file.type.startsWith('image/')) {
       error('File must be an image');
       return;
@@ -112,7 +107,6 @@ const CreateProductPage = () => {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      // reader.result = "data:image/jpeg;base64,...."
       setFormData(prev => ({
         ...prev,
         images: [reader.result]
@@ -201,18 +195,29 @@ const CreateProductPage = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-3xl mx-auto">
+
       {/* Header */}
-      <div className="mb-6">
-        <p className="eyebrow mb-1">
-          {isEditMode ? 'Edit mode' : 'New product'}
-        </p>
-        <h1 className="text-2xl md:text-3xl font-bold text-[#3D1A00]">
-          {isEditMode ? 'Edit Product' : 'Create New Product'}
-        </h1>
-        <p className="text-[#7A6A5A] mt-1 text-sm">
-          {isEditMode ? 'Update your product information' : 'Add a new product to your store'}
-        </p>
+      <div className="mb-6 flex items-start gap-3">
+        <button
+          type="button"
+          onClick={() => navigate('/admin/products')}
+          className="px-3 py-1.5 rounded-full bg-white border border-orange-200 text-[#3D1A00] hover:bg-orange-50 transition-colors text-sm font-semibold"
+          title="Back to products"
+        >
+          ← Back
+        </button>
+        <div className="flex-1">
+          <p className="eyebrow mb-1 text-xs">
+            {isEditMode ? 'Edit mode' : 'New product'}
+          </p>
+          <h1 className="text-xl md:text-2xl font-bold text-[#3D1A00]">
+            {isEditMode ? 'Edit Product' : 'Create New Product'}
+          </h1>
+          <p className="text-[#7A6A5A] mt-0.5 text-xs">
+            {isEditMode ? 'Update your product information' : 'Add a new product to your store'}
+          </p>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-soft p-6 md:p-8 space-y-6 border border-orange-100">
@@ -227,7 +232,7 @@ const CreateProductPage = () => {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full px-4 py-3 bg-cream border border-orange-100 rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+            className="w-full px-4 py-3 bg-cream border border-orange-100 rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
             placeholder="Enter product name"
             required
           />
@@ -243,7 +248,7 @@ const CreateProductPage = () => {
             value={formData.description}
             onChange={handleChange}
             rows="4"
-            className="w-full px-4 py-3 bg-cream border border-orange-100 rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent resize-none"
+            className="w-full px-4 py-3 bg-cream border border-orange-100 rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent resize-none transition-all"
             placeholder="Enter product description"
             required
           />
@@ -253,10 +258,10 @@ const CreateProductPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-bold text-[#3D1A00] mb-2">
-              Price <span className="text-red-500">*</span> (NPR)
+              Price <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-600 font-bold">रु</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-600 font-bold text-sm">रु</span>
               <input
                 type="number"
                 name="price"
@@ -264,7 +269,7 @@ const CreateProductPage = () => {
                 onChange={handleChange}
                 step="1"
                 min="0"
-                className="w-full pl-10 pr-4 py-3 bg-cream border border-orange-100 rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-3 bg-cream border border-orange-100 rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
                 placeholder="0"
                 required
               />
@@ -286,7 +291,7 @@ const CreateProductPage = () => {
               value={formData.stock}
               onChange={handleChange}
               min="0"
-              className="w-full px-4 py-3 bg-cream border border-orange-100 rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+              className="w-full px-4 py-3 bg-cream border border-orange-100 rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
               placeholder="0"
             />
           </div>
@@ -301,7 +306,7 @@ const CreateProductPage = () => {
             name="category"
             value={formData.category}
             onChange={handleChange}
-            className="w-full px-4 py-3 bg-cream border border-orange-100 rounded-2xl text-[#3D1A00] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent cursor-pointer"
+            className="w-full px-4 py-3 bg-cream border border-orange-100 rounded-2xl text-[#3D1A00] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent cursor-pointer transition-all"
             required
           >
             <option value="">Select a category</option>
@@ -322,14 +327,13 @@ const CreateProductPage = () => {
           )}
         </div>
 
-        {/* ═══ Product Image — URL or Upload ═══ */}
+        {/* Product Image */}
         <div>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <label className="block text-sm font-bold text-[#3D1A00]">
               Product Image
             </label>
 
-            {/* Mode toggle */}
             <div className="inline-flex rounded-full bg-cream border border-orange-100 p-0.5">
               <button
                 type="button"
@@ -351,12 +355,11 @@ const CreateProductPage = () => {
                     : 'text-[#7A6A5A] hover:text-[#3D1A00]'
                 }`}
               >
-                Upload from Device
+                Upload
               </button>
             </div>
           </div>
 
-          {/* URL mode — multiple URLs */}
           {imageMode === 'url' && (
             <div>
               {formData.images.map((image, index) => (
@@ -365,7 +368,7 @@ const CreateProductPage = () => {
                     type="url"
                     value={image.startsWith('data:') ? '' : image}
                     onChange={(e) => handleImageChange(index, e.target.value)}
-                    className="flex-1 px-4 py-3 bg-cream border border-orange-100 rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                    className="flex-1 px-4 py-3 bg-cream border border-orange-100 rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
                     placeholder={`Image URL ${index + 1}`}
                   />
                   {formData.images.length > 1 && (
@@ -373,6 +376,7 @@ const CreateProductPage = () => {
                       type="button"
                       onClick={() => removeImageField(index)}
                       className="px-4 py-3 bg-red-50 text-red-600 rounded-2xl hover:bg-red-100 transition-colors font-semibold text-sm"
+                      title="Remove"
                     >
                       Remove
                     </button>
@@ -382,7 +386,7 @@ const CreateProductPage = () => {
               <button
                 type="button"
                 onClick={addImageField}
-                className="mt-1 text-sm text-orange-600 hover:text-orange-700 transition-colors font-semibold"
+                className="mt-2 text-sm text-orange-600 hover:text-orange-700 transition-colors font-semibold"
               >
                 + Add Another Image URL
               </button>
@@ -392,17 +396,14 @@ const CreateProductPage = () => {
             </div>
           )}
 
-          {/* Upload mode — single file */}
           {imageMode === 'upload' && (
             <div>
               <label
                 htmlFor="image-upload"
                 className="flex flex-col items-center justify-center gap-3 p-8 border-2 border-dashed border-orange-200 rounded-2xl bg-cream hover:bg-orange-50 hover:border-orange-400 transition-all cursor-pointer group"
               >
-                <div className="w-14 h-14 rounded-full bg-orange-100 group-hover:bg-orange-200 flex items-center justify-center transition-all">
-                  <svg className="w-7 h-7 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
+                <div className="w-14 h-14 rounded-full bg-orange-100 group-hover:bg-orange-200 flex items-center justify-center transition-all text-orange-600 text-2xl font-bold">
+                  ↑
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-bold text-[#3D1A00]">
@@ -427,7 +428,6 @@ const CreateProductPage = () => {
             </div>
           )}
 
-          {/* Preview — works for both URL and upload */}
           {formData.images[0] && (
             <div className="mt-4 flex items-start gap-4 p-3 bg-cream rounded-2xl border border-orange-100">
               <img
@@ -454,12 +454,10 @@ const CreateProductPage = () => {
               <button
                 type="button"
                 onClick={() => setFormData(prev => ({ ...prev, images: [''] }))}
-                className="text-red-500 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition-colors"
+                className="text-red-500 hover:text-red-600 px-3 py-2 rounded-full hover:bg-red-50 transition-colors text-xs font-semibold"
                 title="Remove image"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
+                Remove
               </button>
             </div>
           )}

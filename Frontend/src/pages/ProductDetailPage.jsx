@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { productService } from '../services/productService'
 import { useCart } from '../hooks/useCart'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import toast from 'react-hot-toast'
+import ProductCard from '../components/products/ProductCard'
 
 const ProductDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const [product, setProduct] = useState(null)
+  const [relatedProducts, setRelatedProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [qty, setQty] = useState(1)
   const [isAdding, setIsAdding] = useState(false)
@@ -21,8 +23,13 @@ const ProductDetailPage = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
+        setLoading(true)
         const data = await productService.getProductById(id)
         setProduct(data)
+        // Fetch related products (same category)
+        const all = await productService.getAllProducts()
+        const related = all.filter(p => p.category === data.category && p._id !== data._id).slice(0, 4)
+        setRelatedProducts(related)
       } catch (error) {
         toast.error('Product not found')
         navigate('/products')
@@ -164,17 +171,17 @@ const ProductDetailPage = () => {
                 )}
               </div>
 
-              {/* Description — scrollable */}
-              <div className="mb-4">
-                <h3 className="text-[#3D1A00] font-bold mb-2 text-[11px] uppercase tracking-widest">
-                  Product Description
-                </h3>
-                <div className="h-[120px] overflow-y-auto pr-2 product-desc-scroll">
+              {/* Description — full display, no scroll */}
+              {product.description && (
+                <div className="mb-5">
+                  <h3 className="text-[#3D1A00] font-bold mb-2 text-[11px] uppercase tracking-widest">
+                    Product Description
+                  </h3>
                   <p className="text-sm text-[#5C4B3A] leading-relaxed">
                     {product.description}
                   </p>
                 </div>
-              </div>
+              )}
 
               {/* Quantity — compact */}
               {product.countInStock > 0 && (
@@ -249,29 +256,37 @@ const ProductDetailPage = () => {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Custom scrollbar for description */}
-      <style>{`
-        .product-desc-scroll {
-          scrollbar-width: thin;
-          scrollbar-color: #F15A29 #FFF4E6;
-        }
-        .product-desc-scroll::-webkit-scrollbar {
-          width: 6px;
-        }
-        .product-desc-scroll::-webkit-scrollbar-track {
-          background: #FFF4E6;
-          border-radius: 4px;
-        }
-        .product-desc-scroll::-webkit-scrollbar-thumb {
-          background: #F15A29;
-          border-radius: 4px;
-        }
-        .product-desc-scroll::-webkit-scrollbar-thumb:hover {
-          background: #C2410C;
-        }
-      `}</style>
+        {/* ═══════ RELATED PRODUCTS ═══════ */}
+        {relatedProducts.length > 0 && (
+          <div className="mt-12">
+            <div className="mb-6">
+              <p className="text-xs font-semibold text-orange-600 uppercase tracking-widest mb-1">You may also like</p>
+              <h2 className="text-2xl md:text-3xl font-bold text-[#3D1A00]">Related Products</h2>
+              <p className="text-sm text-[#7A6A5A] mt-1">More from <span className="font-semibold text-orange-600">{product.category}</span></p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {relatedProducts.map((p) => (
+                <ProductCard key={p._id} product={p} />
+              ))}
+            </div>
+
+            <div className="text-center mt-8">
+              <Link
+                to={`/products?category=${encodeURIComponent(product.category)}`}
+                className="inline-flex items-center gap-2 border-2 border-orange-600 text-orange-600 px-6 py-3 rounded-full font-semibold hover:bg-orange-600 hover:text-white transition-all duration-300 text-sm"
+              >
+                View all {product.category}
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        )}
+
+      </div>
     </div>
   )
 }

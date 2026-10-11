@@ -5,7 +5,7 @@ import { useCart } from '../../context/CartContext'
 import CartIcon from '../cart/CartIcon'
 import TopAnnouncementBar from './TopAnnouncementBar'
 import CategoriesDropdown from './CategoriesDropdown'
-import { User, LayoutDashboard, LogOut, Package, LogIn, UserPlus } from 'lucide-react'
+import { User, LayoutDashboard, LogOut, Package, LogIn, UserPlus, ShoppingBag } from 'lucide-react'
 
 const Navbar = () => {
   const { user, logout } = useAuth()
@@ -14,6 +14,7 @@ const Navbar = () => {
   const location = useLocation()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const dropdownRef = useRef(null)
   const mobileMenuRef = useRef(null)
@@ -43,11 +44,16 @@ const Navbar = () => {
     setIsMobileMenuOpen(false)
   }, [location])
 
-  const handleLogout = async (e) => {
+  const confirmLogout = (e) => {
     e.preventDefault()
+    setIsDropdownOpen(false)
+    setIsMobileMenuOpen(false)
+    setShowLogoutConfirm(true)
+  }
+
+  const handleLogout = async () => {
     try {
-      setIsDropdownOpen(false)
-      setIsMobileMenuOpen(false)
+      setShowLogoutConfirm(false)
       logout()
       navigate('/login')
     } catch (error) {
@@ -62,6 +68,8 @@ const Navbar = () => {
   if (location.pathname.startsWith('/admin')) {
     return null
   }
+
+  const userInitial = user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'
 
   return (
     <>
@@ -92,83 +100,28 @@ const Navbar = () => {
             </Link>
 
             <div className="hidden md:flex flex-1 items-center justify-center space-x-1">
-              <Link
-                to="/"
-                className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105"
-                style={{
-                  color: 'var(--text-secondary)',
-                  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'var(--text-primary)'
-                  e.currentTarget.style.backgroundColor = 'var(--hover-bg)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'var(--text-secondary)'
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
-              >
-                Home
-              </Link>
-
-              <Link
-                to="/products"
-                className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105"
-                style={{
-                  color: 'var(--text-secondary)',
-                  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'var(--text-primary)'
-                  e.currentTarget.style.backgroundColor = 'var(--hover-bg)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'var(--text-secondary)'
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
-              >
-                Products
-              </Link>
+              {[{ to: '/', label: 'Home' }, { to: '/products', label: 'Products' }, { to: '/about', label: 'About Us' }, { to: '/contact', label: 'Contact' }].map(({ to, label }) => {
+                const isActive = to === '/' ? location.pathname === '/' : location.pathname.startsWith(to)
+                return (
+                  <Link
+                    key={to}
+                    to={to}
+                    className="relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105 nav-link-item"
+                    style={{
+                      color: isActive ? '#F15A29' : 'var(--text-secondary)',
+                      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif',
+                      fontWeight: isActive ? '700' : '500',
+                    }}
+                  >
+                    {label}
+                    {isActive && (
+                      <span className="nav-active-glow" />
+                    )}
+                  </Link>
+                )
+              })}
 
               <CategoriesDropdown />
-
-              <Link
-                to="/about"
-                className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105"
-                style={{
-                  color: 'var(--text-secondary)',
-                  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'var(--text-primary)'
-                  e.currentTarget.style.backgroundColor = 'var(--hover-bg)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'var(--text-secondary)'
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
-              >
-                About Us
-              </Link>
-
-              <Link
-                to="/contact"
-                className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:scale-105"
-                style={{
-                  color: 'var(--text-secondary)',
-                  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'var(--text-primary)'
-                  e.currentTarget.style.backgroundColor = 'var(--hover-bg)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'var(--text-secondary)'
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
-              >
-                Contact
-              </Link>
             </div>
 
             {/* ─── Right: cart + user ─── */}
@@ -204,10 +157,22 @@ const Navbar = () => {
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <div
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-white font-semibold text-xs shadow-lg"
+                      className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center text-white font-semibold text-xs shadow-lg"
                       style={{ background: 'var(--avatar-gradient)' }}
                     >
-                      {user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
+                      {user.photo ? (
+                        <img
+                          src={user.photo}
+                          alt={user.name || 'User'}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none'
+                            e.currentTarget.parentElement.innerText = userInitial
+                          }}
+                        />
+                      ) : (
+                        userInitial
+                      )}
                     </div>
                     <span
                       className="hidden lg:inline text-sm font-medium"
@@ -227,13 +192,33 @@ const Navbar = () => {
                         boxShadow: 'var(--dropdown-shadow)'
                       }}
                     >
-                      <div className="px-5 py-4 border-b" style={{ borderColor: 'var(--divider-color)' }}>
-                        <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                          {user.name}
-                        </p>
-                        <p className="text-xs truncate mt-1" style={{ color: 'var(--text-secondary)' }}>
-                          {user.email}
-                        </p>
+                      <div className="px-5 py-4 border-b flex items-center gap-3" style={{ borderColor: 'var(--divider-color)' }}>
+                        <div
+                          className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center text-white font-semibold text-sm shrink-0"
+                          style={{ background: 'var(--avatar-gradient)' }}
+                        >
+                          {user.photo ? (
+                            <img
+                              src={user.photo}
+                              alt={user.name || 'User'}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none'
+                                e.currentTarget.parentElement.innerText = userInitial
+                              }}
+                            />
+                          ) : (
+                            userInitial
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                            {user.name}
+                          </p>
+                          <p className="text-xs truncate mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                            {user.email}
+                          </p>
+                        </div>
                       </div>
 
                       <div className="py-1">
@@ -255,6 +240,26 @@ const Navbar = () => {
                           Profile
                         </Link>
 
+                        {user.role !== 'admin' && (
+                          <Link
+                            to="/orders"
+                            onClick={() => setIsDropdownOpen(false)}
+                            className="flex items-center gap-3 px-5 py-2.5 text-sm transition-all duration-200 mx-2 rounded-lg"
+                            style={{ color: 'var(--text-primary)' }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = 'var(--hover-bg)'
+                              e.currentTarget.style.color = 'var(--accent-cyan)'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'transparent'
+                              e.currentTarget.style.color = 'var(--text-primary)'
+                            }}
+                          >
+                            <span><ShoppingBag className="w-4 h-4" /></span>
+                            My Orders
+                          </Link>
+                        )}
+
                         {user.role === 'admin' && (
                           <Link
                             to="/admin"
@@ -272,7 +277,7 @@ const Navbar = () => {
                         <div className="mx-4 my-1" style={{ borderTop: 'var(--divider-border)' }}></div>
 
                         <button
-                          onClick={handleLogout}
+                          onClick={confirmLogout}
                           className="flex items-center gap-3 w-full text-left px-5 py-2.5 text-sm transition-all duration-200 mx-2 rounded-lg"
                           style={{ color: 'var(--error-red)' }}
                           onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--error-hover-bg)'}
@@ -378,17 +383,26 @@ const Navbar = () => {
                 backdropFilter: 'blur(40px)'
               }}
             >
-              <Link
-                to="/products"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-5 py-3 text-sm font-medium transition-all duration-200 rounded-xl mx-3"
-                style={{ color: 'var(--text-primary)' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--hover-bg)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                <span className="text-base"><Package className="w-4 h-4" /></span>
-                Products
-              </Link>
+              {[{ to: '/', label: 'Home', icon: '🏠' }, { to: '/products', label: 'Products', icon: '📦' }, { to: '/about', label: 'About Us', icon: '💡' }, { to: '/contact', label: 'Contact', icon: '✉️' }].map(({ to, label, icon }) => {
+                const isActive = to === '/' ? location.pathname === '/' : location.pathname.startsWith(to)
+                return (
+                  <Link
+                    key={to}
+                    to={to}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-5 py-3 text-sm font-medium transition-all duration-200 rounded-xl mx-3"
+                    style={{
+                      color: isActive ? '#F15A29' : 'var(--text-primary)',
+                      backgroundColor: isActive ? 'rgba(241,90,41,0.08)' : 'transparent',
+                      fontWeight: isActive ? '700' : '500',
+                      boxShadow: isActive ? '0 0 12px rgba(241,90,41,0.2)' : 'none',
+                    }}
+                  >
+                    <span className="text-base">{icon}</span>
+                    {label}
+                  </Link>
+                )
+              })}
 
               {user?.role === 'admin' && (
                 <Link
@@ -410,9 +424,29 @@ const Navbar = () => {
 
               {user ? (
                 <>
-                  <div className="px-5 py-3 mx-3 rounded-xl" style={{ backgroundColor: 'var(--mobile-user-bg)' }}>
-                    <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{user.name}</p>
-                    <p className="text-xs truncate mt-0.5" style={{ color: 'var(--text-secondary)' }}>{user.email}</p>
+                  <div className="px-5 py-3 mx-3 rounded-xl flex items-center gap-3" style={{ backgroundColor: 'var(--mobile-user-bg)' }}>
+                    <div
+                      className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center text-white font-semibold text-sm shrink-0"
+                      style={{ background: 'var(--avatar-gradient)' }}
+                    >
+                      {user.photo ? (
+                        <img
+                          src={user.photo}
+                          alt={user.name || 'User'}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none'
+                            e.currentTarget.parentElement.innerText = userInitial
+                          }}
+                        />
+                      ) : (
+                        userInitial
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{user.name}</p>
+                      <p className="text-xs truncate mt-0.5" style={{ color: 'var(--text-secondary)' }}>{user.email}</p>
+                    </div>
                   </div>
                   <Link
                     to="/profile"
@@ -425,8 +459,21 @@ const Navbar = () => {
                     <span className="text-base"><User className="w-4 h-4" /></span>
                     Profile
                   </Link>
+                  {user.role !== 'admin' && (
+                    <Link
+                      to="/orders"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-5 py-3 text-sm transition-all duration-200 rounded-xl mx-3"
+                      style={{ color: 'var(--text-primary)' }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--hover-bg)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <span className="text-base"><ShoppingBag className="w-4 h-4" /></span>
+                      My Orders
+                    </Link>
+                  )}
                   <button
-                    onClick={handleLogout}
+                    onClick={confirmLogout}
                     className="flex items-center gap-3 w-full text-left px-5 py-3 text-sm transition-all duration-200 rounded-xl mx-3 font-medium"
                     style={{ color: 'var(--error-red)' }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--error-hover-bg)'}
@@ -516,8 +563,49 @@ const Navbar = () => {
           }
           .animate-scale-in { animation: scale-in 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
           .animate-slide-down { animation: slide-down 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+          .nav-link-item { position: relative; }
+          .nav-active-glow {
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 2px;
+            width: 70%;
+            border-radius: 9999px;
+            background: #F15A29;
+            display: block;
+          }
         `}</style>
       </nav>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#3D1A00]/40 backdrop-blur-sm animate-scale-in">
+          <div className="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full border border-orange-100 shadow-2xl">
+            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <LogOut className="w-8 h-8 text-red-500" />
+            </div>
+            <h3 className="text-2xl font-bold text-center text-[#3D1A00] mb-2">Ready to leave?</h3>
+            <p className="text-center text-[#7A6A5A] mb-8 text-sm">
+              Are you sure you want to log out of your account? You will need to log back in to manage your orders.
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleLogout}
+                className="w-full py-3.5 bg-red-500 text-white rounded-full font-bold hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20"
+              >
+                Yes, log out
+              </button>
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="w-full py-3.5 bg-cream border border-orange-200 text-[#3D1A00] rounded-full font-semibold hover:bg-orange-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

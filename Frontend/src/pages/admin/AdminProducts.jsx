@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { productService } from '../../services/productService';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
+import { Search, Plus, Package } from 'lucide-react';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -107,37 +108,32 @@ const AdminProducts = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <p className="eyebrow mb-1">Catalog</p>
-          <h1 className="text-2xl md:text-3xl font-bold text-[#3D1A00]">Products Management</h1>
-          <p className="text-[#7A6A5A] mt-1 text-sm">Manage your product inventory</p>
+        <div className="flex-shrink-0 text-center md:text-left">
+          <p className="eyebrow mb-1 text-xs">Catalog</p>
+          <h1 className="text-xl md:text-2xl font-bold text-[#3D1A00]">Products Management</h1>
+          <p className="text-xs text-[#7A6A5A] mt-0.5">Total: <span className="font-bold text-[#3D1A00]">{filteredProducts.length}</span></p>
         </div>
-        <Link
-          to="/admin/products/create"
-          className="bg-orange-600 text-white px-5 py-3 rounded-full font-bold hover:bg-orange-700 transition-all duration-300 flex items-center gap-2 shadow-lg shadow-orange-500/20"
-        >
-          <span className="text-xl">+</span> Add New Product
-        </Link>
-      </div>
 
-      {/* Search */}
-      <div className="bg-white rounded-2xl shadow-soft p-5 border border-orange-100">
-        <div className="flex flex-col md:flex-row justify-between gap-4">
-          <div className="relative flex-1">
+        <div className="w-full md:w-auto flex flex-col sm:flex-row items-center gap-3 bg-white rounded-2xl p-3 border border-orange-100 shadow-soft">
+          <div className="w-full sm:w-64 md:w-72 relative">
             <input
               type="text"
-              placeholder="Search products by name or category..."
+              placeholder="Search products..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2.5 pl-10 bg-cream border border-orange-100 rounded-full text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+              className="w-full px-4 py-2 pl-10 bg-cream border border-orange-100 rounded-full text-sm text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
             />
-            <span className="absolute left-3.5 top-3 text-[#A8998A]">🔍</span>
+            <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-[#A8998A]" />
           </div>
-          <div className="text-sm text-[#7A6A5A] flex items-center">
-            Total: <span className="text-[#3D1A00] font-bold ml-1 mr-1">{filteredProducts.length}</span> products
-          </div>
+
+          <Link
+            to="/admin/products/create"
+            className="flex-shrink-0 bg-orange-600 text-white px-5 py-2 rounded-full font-bold text-sm hover:bg-orange-700 transition-all duration-300 flex items-center gap-2 shadow-lg shadow-orange-500/20 whitespace-nowrap w-full sm:w-auto justify-center"
+          >
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            Add Product
+          </Link>
         </div>
       </div>
 
@@ -158,7 +154,9 @@ const AdminProducts = () => {
               {currentProducts.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-12 text-center text-[#7A6A5A]">
-                    <div className="text-5xl mb-2">📦</div>
+                    <div className="flex justify-center mb-3 text-orange-200">
+                      <Package size={48} strokeWidth={1.5} />
+                    </div>
                     <p>No products found</p>
                     {searchTerm && (
                       <button
@@ -183,7 +181,7 @@ const AdminProducts = () => {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <span className="text-orange-300 text-xl">📦</span>
+                            <Package className="text-orange-300 w-6 h-6" />
                           )}
                         </div>
                         <div>
@@ -258,11 +256,10 @@ const AdminProducts = () => {
             <button
               onClick={goToPrevPage}
               disabled={currentPage === 1}
-              className={`px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 ${
-                currentPage === 1
-                  ? 'bg-orange-50 text-[#A8998A] cursor-not-allowed'
-                  : 'bg-white border border-orange-200 text-[#3D1A00] hover:bg-orange-50'
-              }`}
+              className={`px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 ${currentPage === 1
+                ? 'bg-orange-50 text-[#A8998A] cursor-not-allowed'
+                : 'bg-white border border-orange-200 text-[#3D1A00] hover:bg-orange-50'
+                }`}
             >
               Previous
             </button>
@@ -284,11 +281,10 @@ const AdminProducts = () => {
                   <button
                     key={pageNum}
                     onClick={() => goToPage(pageNum)}
-                    className={`w-10 h-10 rounded-full font-semibold transition-all duration-300 ${
-                      currentPage === pageNum
-                        ? 'bg-orange-600 text-white shadow-lg shadow-orange-500/30'
-                        : 'bg-white border border-orange-200 text-[#3D1A00] hover:bg-orange-50'
-                    }`}
+                    className={`w-10 h-10 rounded-full font-semibold transition-all duration-300 ${currentPage === pageNum
+                      ? 'bg-orange-600 text-white shadow-lg shadow-orange-500/30'
+                      : 'bg-white border border-orange-200 text-[#3D1A00] hover:bg-orange-50'
+                      }`}
                   >
                     {pageNum}
                   </button>
@@ -311,11 +307,10 @@ const AdminProducts = () => {
             <button
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
-              className={`px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 ${
-                currentPage === totalPages
-                  ? 'bg-orange-50 text-[#A8998A] cursor-not-allowed'
-                  : 'bg-white border border-orange-200 text-[#3D1A00] hover:bg-orange-50'
-              }`}
+              className={`px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 ${currentPage === totalPages
+                ? 'bg-orange-50 text-[#A8998A] cursor-not-allowed'
+                : 'bg-white border border-orange-200 text-[#3D1A00] hover:bg-orange-50'
+                }`}
             >
               Next
             </button>

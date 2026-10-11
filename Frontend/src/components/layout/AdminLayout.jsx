@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
+import Modal from "../Modal";
 
 // ─── SVG Icons ───
 const Icons = {
@@ -35,7 +36,7 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M12 18v3" />
     </svg>
   ),
-  Users: (
+  Customers: (
     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
     </svg>
@@ -99,6 +100,7 @@ function AdminLayout() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [lastLogin, setLastLogin] = useState('');
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const sidebarRef = useRef(null);
 
   const navItems = [
@@ -115,18 +117,10 @@ function AdminLayout() {
       ]
     },
     { path: "/admin/orders", name: "Orders", icon: Icons.Orders, dropdown: false },
-    { path: "/admin/users", name: "Users", icon: Icons.Users, dropdown: false },
+    { path: "/admin/users", name: "Customers", icon: Icons.Customers, dropdown: false },
     { path: "/admin/contacts", name: "Contacts", icon: Icons.Contacts, dropdown: false },
-    {
-      path: "#",
-      name: "Reports",
-      icon: Icons.Reports,
-      dropdown: true,
-      dropdownItems: [
-        { path: "/admin/reports", name: "Reports", icon: Icons.Reports },
-        { path: "/admin/analytics", name: "Analytics", icon: Icons.Analytics }
-      ]
-    },
+    { path: "/admin/reports", name: "Reports", icon: Icons.Reports, dropdown: false },
+    { path: "/admin/analytics", name: "Analytics", icon: Icons.Analytics, dropdown: false },
     { path: "/admin/settings", name: "Settings", icon: Icons.Settings, dropdown: false },
   ];
 
@@ -250,16 +244,25 @@ function AdminLayout() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = async () => {
+  const openLogoutModal = () => {
+    setIsProfileOpen(false);
+    setIsLogoutModalOpen(true);
+  };
+
+  const handleConfirmLogout = async () => {
     try {
       await logout();
       sessionStorage.removeItem('adminLastLogin');
       success("Logged out successfully");
-      setIsProfileOpen(false);
+      setIsLogoutModalOpen(false);
       navigate('/login');
     } catch (error) {
       toastError("Logout failed");
     }
+  };
+
+  const handleCancelLogout = () => {
+    setIsLogoutModalOpen(false);
   };
 
   if (!user || user.role !== 'admin') {
@@ -418,7 +421,7 @@ function AdminLayout() {
 
         <div className="flex-shrink-0 p-3 border-t border-[#4A2410]/60">
           <button
-            onClick={handleLogout}
+            onClick={openLogoutModal}
             className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-[#4A2410] transition-all duration-300 text-[#D4C4B0] hover:text-white group"
           >
             <span className="flex-shrink-0 transition-transform duration-300 group-hover:scale-110">{Icons.Logout}</span>
@@ -436,7 +439,7 @@ function AdminLayout() {
         <header className="bg-white/95 backdrop-blur-md shadow-sm px-6 py-3 sticky top-0 z-10 border-b border-orange-100/70">
           <div className="max-w-[1600px] mx-auto w-full flex justify-between items-center">
 
-            {/* Left: page title / expand button when collapsed */}
+            {/* Left */}
             <div className="flex items-center gap-3 shrink-0">
               {!isSidebarOpen && (
                 <button
@@ -454,7 +457,7 @@ function AdminLayout() {
               </p>
             </div>
 
-            {/* Right: Date / Time / Last Login + Fullscreen + Profile */}
+            {/* Right */}
             <div className="flex items-center gap-3 sm:gap-4 shrink-0">
 
               <div className="hidden md:flex items-center gap-3 lg:gap-4">
@@ -480,31 +483,29 @@ function AdminLayout() {
                 <div className="w-px h-8 bg-orange-100 shrink-0" />
               </div>
 
-                      {/* Fullscreen toggle */}
-            <button
-              onClick={toggleFullscreen}
-              className="p-2 rounded-full hover:bg-orange-50 transition-all duration-300 text-[#3D1A00] hover:scale-110 shrink-0"
-              title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-              aria-label="Toggle fullscreen"
-            >
-              {isFullscreen ? (
-                // Exit fullscreen — inward arrows (4 corners pointing in)
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 3v4a2 2 0 0 1-2 2H3" />
-                  <path d="M15 3v4a2 2 0 0 0 2 2h4" />
-                  <path d="M9 21v-4a2 2 0 0 0-2-2H3" />
-                  <path d="M15 21v-4a2 2 0 0 1 2-2h4" />
-                </svg>
-              ) : (
-                // Enter fullscreen — outward arrows (4 corners pointing out)
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 9V6a3 3 0 0 1 3-3h3" />
-                  <path d="M21 9V6a3 3 0 0 0-3-3h-3" />
-                  <path d="M3 15v3a3 3 0 0 0 3 3h3" />
-                  <path d="M21 15v3a3 3 0 0 1-3 3h-3" />
-                </svg>
-              )}
-            </button>
+              {/* Fullscreen toggle */}
+              <button
+                onClick={toggleFullscreen}
+                className="p-2 rounded-full hover:bg-orange-50 transition-all duration-300 text-[#3D1A00] hover:scale-110 shrink-0"
+                title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                aria-label="Toggle fullscreen"
+              >
+                {isFullscreen ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 3v4a2 2 0 0 1-2 2H3" />
+                    <path d="M15 3v4a2 2 0 0 0 2 2h4" />
+                    <path d="M9 21v-4a2 2 0 0 0-2-2H3" />
+                    <path d="M15 21v-4a2 2 0 0 1 2-2h4" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 9V6a3 3 0 0 1 3-3h3" />
+                    <path d="M21 9V6a3 3 0 0 0-3-3h-3" />
+                    <path d="M3 15v3a3 3 0 0 0 3 3h3" />
+                    <path d="M21 15v3a3 3 0 0 1-3 3h-3" />
+                  </svg>
+                )}
+              </button>
 
               {/* Profile */}
               <div className="relative shrink-0">
@@ -512,8 +513,23 @@ function AdminLayout() {
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                   className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full hover:bg-orange-50 transition-all duration-300 group"
                 >
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-[#C2410C] flex items-center justify-center text-white font-bold shadow-md group-hover:scale-105 transition-transform duration-300">
-                    {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'A'}
+                  <div className="w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-orange-500 to-[#C2410C] flex items-center justify-center text-white font-bold shadow-md group-hover:scale-105 transition-transform duration-300">
+                    {user?.photo ? (
+                      <img
+                        src={user.photo}
+                        alt={user.name || 'Admin'}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.parentElement.innerText =
+                            user?.name?.charAt(0).toUpperCase() ||
+                            user?.email?.charAt(0).toUpperCase() ||
+                            'A';
+                        }}
+                      />
+                    ) : (
+                      user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'A'
+                    )}
                   </div>
                   <span className="hidden md:block text-sm font-semibold text-[#3D1A00]">
                     {user?.name?.split(' ')[0] || user?.email?.split('@')[0]}
@@ -528,9 +544,29 @@ function AdminLayout() {
                     isProfileOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
                   }`}
                 >
-                  <div className="px-4 py-3 border-b border-orange-100 bg-[#FFF4E6]">
-                    <p className="text-sm font-bold text-[#3D1A00] truncate">{user?.name}</p>
-                    <p className="text-xs text-[#7A6A5A] truncate">{user?.email}</p>
+                  <div className="px-4 py-3 border-b border-orange-100 bg-[#FFF4E6] flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-orange-500 to-[#C2410C] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                      {user?.photo ? (
+                        <img
+                          src={user.photo}
+                          alt={user.name || 'Admin'}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.parentElement.innerText =
+                              user?.name?.charAt(0).toUpperCase() ||
+                              user?.email?.charAt(0).toUpperCase() ||
+                              'A';
+                          }}
+                        />
+                      ) : (
+                        user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'A'
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-[#3D1A00] truncate">{user?.name}</p>
+                      <p className="text-xs text-[#7A6A5A] truncate">{user?.email}</p>
+                    </div>
                   </div>
                   <Link
                     to="/admin/profile"
@@ -541,7 +577,7 @@ function AdminLayout() {
                     Profile Settings
                   </Link>
                   <button
-                    onClick={handleLogout}
+                    onClick={openLogoutModal}
                     className="w-full flex items-center gap-2 text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
                   >
                     <span>{Icons.Logout}</span>
@@ -564,6 +600,18 @@ function AdminLayout() {
           </div>
         </main>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        isOpen={isLogoutModalOpen}
+        onClose={handleCancelLogout}
+        onConfirm={handleConfirmLogout}
+        title="Confirm Logout"
+        message="Are you sure you want to log out of the admin panel? You will need to sign in again to access it."
+        confirmText="Logout"
+        cancelText="Cancel"
+        type="warning"
+      />
 
       <style>{`
         @keyframes fadeIn {

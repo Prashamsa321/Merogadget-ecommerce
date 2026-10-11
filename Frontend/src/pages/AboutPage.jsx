@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ShieldCheck, Truck, CreditCard, Shield, Phone, Star,
-  Smartphone, Laptop, Headphones, Watch, Gamepad2, Home,
-  Target, Eye, Sparkles, TrendingUp, Users, Heart
+    ShieldCheck, Truck, CreditCard, Shield, Phone, Star,
+    Smartphone, Laptop, Headphones, Watch, Gamepad2, Home,
+    Target, Eye, Sparkles, TrendingUp, Users, Heart
 } from 'lucide-react';
 
 const AboutPage = () => {
@@ -134,20 +134,20 @@ const AboutPage = () => {
 
                             <div className="space-y-4 text-[#5C4B3A] leading-relaxed text-[15px] md:text-base">
                                 <p>
-                                At MeroGadget, we believe technology should make life simpler, smarter, 
-                                and more convenient. Founded in 2020, our mission is to make genuine, 
-                                high-quality electronics accessible to everyone across Nepal at competitive prices.
+                                    At MeroGadget, we believe technology should make life simpler, smarter,
+                                    and more convenient. Founded in 2020, our mission is to make genuine,
+                                    high-quality electronics accessible to everyone across Nepal at competitive prices.
                                 </p>
                                 <p>
-                                We offer a wide range of gadgets and electronics to meet your everyday needs,
-                                 combining quality products, reliable service, and a seamless shopping experience. 
-                                 Our commitment goes beyond selling products—we aim to build lasting relationships through trust,
-                                  transparency, and dependable customer support.
+                                    We offer a wide range of gadgets and electronics to meet your everyday needs,
+                                    combining quality products, reliable service, and a seamless shopping experience.
+                                    Our commitment goes beyond selling products—we aim to build lasting relationships through trust,
+                                    transparency, and dependable customer support.
                                 </p>
                                 <p>
-                                At MeroGadget, your satisfaction inspires us to deliver better technology and better experiences every day.
+                                    At MeroGadget, your satisfaction inspires us to deliver better technology and better experiences every day.
                                 </p>
-                                
+
                             </div>
 
                             <div className="mt-6 mb-8 inline-block bg-gradient-to-r from-orange-600 to-orange-500 text-white px-5 py-3 rounded-2xl shadow-lg shadow-orange-500/20">
@@ -188,8 +188,8 @@ const AboutPage = () => {
 
                                 <div className="relative rounded-[2rem] overflow-hidden shadow-2xl shadow-orange-500/20 border-4 border-white bg-white">
                                     <img
-                                        src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80"
-                                        alt="MeroGadget Store"
+                                        src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80"
+                                        alt="Tech professionals in Nepal working with gadgets"
                                         className="w-full h-[320px] md:h-[420px] lg:h-[480px] object-cover"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-[#3D1A00]/40 via-transparent to-transparent"></div>
@@ -199,8 +199,8 @@ const AboutPage = () => {
                                             <Star className="w-5 h-5 text-white fill-white" strokeWidth={2} />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="text-sm font-bold text-[#3D1A00]">Trusted by 15,000+ Peoples</div>
-                                            <div className="text-xs text-[#7A6A5A]">Rated 4.9/5 across the country</div>
+                                            <div className="text-sm font-bold text-[#3D1A00]">Trusted by 15,000+ People</div>
+                                            <div className="text-xs text-[#7A6A5A]">Rated 4.9/5 across Nepal</div>
                                         </div>
                                     </div>
                                 </div>
@@ -435,11 +435,10 @@ const AboutPage = () => {
                                         {[...Array(5)].map((_, i) => (
                                             <Star
                                                 key={i}
-                                                className={`w-4 h-4 ${
-                                                    i < testimonial.rating
+                                                className={`w-4 h-4 ${i < testimonial.rating
                                                         ? 'fill-yellow-400 text-yellow-400'
                                                         : 'fill-gray-200 text-gray-200'
-                                                }`}
+                                                    }`}
                                             />
                                         ))}
                                     </div>
@@ -454,11 +453,10 @@ const AboutPage = () => {
                             <button
                                 key={i}
                                 onClick={() => setTestimonialIndex(i)}
-                                className={`h-2 rounded-full transition-all duration-300 ${
-                                    i === testimonialIndex
+                                className={`h-2 rounded-full transition-all duration-300 ${i === testimonialIndex
                                         ? 'w-8 bg-orange-600'
                                         : 'w-2 bg-orange-200 hover:bg-orange-300'
-                                }`}
+                                    }`}
                                 aria-label={`Go to testimonial ${i + 1}`}
                             />
                         ))}

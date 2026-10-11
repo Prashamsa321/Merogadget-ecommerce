@@ -12,6 +12,10 @@ const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+
   const fetchOrders = async () => {
     try {
       setLoading(true);
@@ -34,11 +38,11 @@ const AdminOrders = () => {
   }, []);
 
   const statusOptions = [
-    { value: 'Pending',    label: 'Pending',    color: 'bg-amber-50 text-amber-700 border-amber-200',   icon: '⏳', message: 'Order status updated to Pending' },
-    { value: 'Processing', label: 'Processing', color: 'bg-blue-50 text-blue-700 border-blue-200',     icon: '⚙️', message: 'Order status updated to Processing' },
-    { value: 'Shipped',    label: 'Shipped',    color: 'bg-purple-50 text-purple-700 border-purple-200', icon: '🚚', message: 'Order status updated to Shipped' },
-    { value: 'Delivered',  label: 'Delivered',  color: 'bg-green-50 text-green-700 border-green-200',  icon: '✅', message: 'Order status updated to Delivered' },
-    { value: 'Cancelled',  label: 'Cancelled',  color: 'bg-red-50 text-red-700 border-red-200',        icon: '❌', message: 'Order status updated to Cancelled' }
+    { value: 'Pending',    label: 'Pending',    color: 'bg-amber-50 text-amber-700 border-amber-200',   message: 'Order status updated to Pending' },
+    { value: 'Processing', label: 'Processing', color: 'bg-blue-50 text-blue-700 border-blue-200',     message: 'Order status updated to Processing' },
+    { value: 'Shipped',    label: 'Shipped',    color: 'bg-purple-50 text-purple-700 border-purple-200', message: 'Order status updated to Shipped' },
+    { value: 'Delivered',  label: 'Delivered',  color: 'bg-green-50 text-green-700 border-green-200',  message: 'Order status updated to Delivered' },
+    { value: 'Cancelled',  label: 'Cancelled',  color: 'bg-red-50 text-red-700 border-red-200',        message: 'Order status updated to Cancelled' }
   ];
 
   const getStatusBadge = (status) => {
@@ -53,13 +57,6 @@ const AdminOrders = () => {
   };
 
   const getStatusLabel = (status) => status || 'Pending';
-
-  const getStatusIcon = (status) => {
-    const icons = {
-      Pending: '⏳', Processing: '⚙️', Shipped: '🚚', Delivered: '✅', Cancelled: '❌'
-    };
-    return icons[status] || '📦';
-  };
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
@@ -111,6 +108,34 @@ const AdminOrders = () => {
     cancelled: orders.filter(o => o.orderStatus === 'Cancelled').length
   };
 
+  useEffect(() => {
+    setTotalPages(Math.ceil(orders.length / itemsPerPage));
+    setCurrentPage(1);
+  }, [orders.length, itemsPerPage]);
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentOrders = orders.slice(indexOfFirstItem, indexOfLastItem);
+
+  const goToPage = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -137,7 +162,7 @@ const AdminOrders = () => {
             onClick={fetchOrders}
             className="text-xs sm:text-sm text-white bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-full transition-colors font-semibold shadow-md shadow-orange-500/20"
           >
-            🔄 Refresh
+            Refresh
           </button>
           <div className="text-xs sm:text-sm text-[#3D1A00] bg-white border border-orange-100 px-4 py-2 rounded-full font-semibold">
             {stats.totalOrders} Orders
@@ -146,26 +171,25 @@ const AdminOrders = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl p-4 border border-orange-100 shadow-soft">
-          <div className="text-xl mb-1">📦</div>
-          <div className="text-2xl font-bold text-[#3D1A00]">{stats.totalOrders}</div>
-          <div className="text-xs text-[#7A6A5A] uppercase tracking-widest font-semibold mt-1">Total Orders</div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-white rounded-2xl px-4 py-3 border border-orange-100 shadow-soft">
+          <div className="text-xs text-[#7A6A5A] uppercase tracking-widest font-semibold mb-1">Total Orders</div>
+          <div className="text-xl font-bold text-[#3D1A00]">{stats.totalOrders}</div>
         </div>
-        <div className="bg-white rounded-2xl p-4 border border-green-100 shadow-soft">
-          <div className="text-xl mb-1">💰</div>
-          <div className="text-xl font-bold text-green-600">रु {stats.totalRevenue.toLocaleString()}</div>
-          <div className="text-xs text-[#7A6A5A] uppercase tracking-widest font-semibold mt-1">Revenue</div>
+
+        <div className="bg-white rounded-2xl px-4 py-3 border border-green-100 shadow-soft">
+          <div className="text-xs text-[#7A6A5A] uppercase tracking-widest font-semibold mb-1">Revenue</div>
+          <div className="text-lg font-bold text-green-600">रु {stats.totalRevenue.toLocaleString()}</div>
         </div>
-        <div className="bg-white rounded-2xl p-4 border border-amber-100 shadow-soft">
-          <div className="text-xl mb-1">⏳</div>
-          <div className="text-2xl font-bold text-amber-600">{stats.pending}</div>
-          <div className="text-xs text-[#7A6A5A] uppercase tracking-widest font-semibold mt-1">Pending</div>
+
+        <div className="bg-white rounded-2xl px-4 py-3 border border-amber-100 shadow-soft">
+          <div className="text-xs text-[#7A6A5A] uppercase tracking-widest font-semibold mb-1">Pending</div>
+          <div className="text-xl font-bold text-amber-600">{stats.pending}</div>
         </div>
-        <div className="bg-white rounded-2xl p-4 border border-green-100 shadow-soft">
-          <div className="text-xl mb-1">✅</div>
-          <div className="text-2xl font-bold text-green-600">{stats.delivered}</div>
-          <div className="text-xs text-[#7A6A5A] uppercase tracking-widest font-semibold mt-1">Delivered</div>
+
+        <div className="bg-white rounded-2xl px-4 py-3 border border-green-100 shadow-soft">
+          <div className="text-xs text-[#7A6A5A] uppercase tracking-widest font-semibold mb-1">Delivered</div>
+          <div className="text-xl font-bold text-green-600">{stats.delivered}</div>
         </div>
       </div>
 
@@ -173,7 +197,6 @@ const AdminOrders = () => {
       <div className="bg-white rounded-2xl shadow-soft overflow-hidden border border-orange-100">
         {orders.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-5xl mb-3">🛒</div>
             <p className="text-[#7A6A5A]">No orders found</p>
           </div>
         ) : (
@@ -191,7 +214,7 @@ const AdminOrders = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-orange-50">
-                {orders.map((order) => (
+                {currentOrders.map((order) => (
                   <tr key={order._id} className="hover:bg-orange-50/50 transition-colors">
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className="text-xs font-mono text-orange-600 font-semibold">
@@ -217,8 +240,7 @@ const AdminOrders = () => {
                       </p>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border inline-flex items-center gap-1 ${getStatusBadge(order.orderStatus)}`}>
-                        <span>{getStatusIcon(order.orderStatus)}</span>
+                      <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border inline-flex items-center ${getStatusBadge(order.orderStatus)}`}>
                         {getStatusLabel(order.orderStatus)}
                       </span>
                     </td>
@@ -250,7 +272,7 @@ const AdminOrders = () => {
 
             {/* Mobile Cards */}
             <div className="md:hidden space-y-3 p-3">
-              {orders.map((order) => (
+              {currentOrders.map((order) => (
                 <div key={order._id} className="bg-white rounded-2xl p-4 space-y-3 border border-orange-100">
                   <div className="flex justify-between items-start">
                     <div>
@@ -259,8 +281,7 @@ const AdminOrders = () => {
                         {order.orderNumber || order._id?.slice(-8)}
                       </p>
                     </div>
-                    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border inline-flex items-center gap-1 ${getStatusBadge(order.orderStatus)}`}>
-                      <span>{getStatusIcon(order.orderStatus)}</span>
+                    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border inline-flex items-center ${getStatusBadge(order.orderStatus)}`}>
                       {getStatusLabel(order.orderStatus)}
                     </span>
                   </div>
@@ -300,6 +321,82 @@ const AdminOrders = () => {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="text-sm text-[#7A6A5A]">
+            Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, orders.length)} of {orders.length} orders
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={goToPrevPage}
+              disabled={currentPage === 1}
+              className={`px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 ${
+                currentPage === 1
+                  ? 'bg-orange-50 text-[#A8998A] cursor-not-allowed'
+                  : 'bg-white border border-orange-200 text-[#3D1A00] hover:bg-orange-50'
+              }`}
+            >
+              Previous
+            </button>
+
+            <div className="flex gap-1.5">
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => goToPage(pageNum)}
+                    className={`w-10 h-10 rounded-full font-semibold transition-all duration-300 ${
+                      currentPage === pageNum
+                        ? 'bg-orange-600 text-white shadow-lg shadow-orange-500/30'
+                        : 'bg-white border border-orange-200 text-[#3D1A00] hover:bg-orange-50'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+
+              {totalPages > 5 && currentPage < totalPages - 2 && (
+                <>
+                  <span className="px-2 py-2 text-[#A8998A]">...</span>
+                  <button
+                    onClick={() => goToPage(totalPages)}
+                    className="w-10 h-10 rounded-full font-semibold transition-all duration-300 bg-white border border-orange-200 text-[#3D1A00] hover:bg-orange-50"
+                  >
+                    {totalPages}
+                  </button>
+                </>
+              )}
+            </div>
+
+            <button
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className={`px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 ${
+                currentPage === totalPages
+                  ? 'bg-orange-50 text-[#A8998A] cursor-not-allowed'
+                  : 'bg-white border border-orange-200 text-[#3D1A00] hover:bg-orange-50'
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Order Details Modal */}
       {isDetailsModalOpen && selectedOrder && (
@@ -378,7 +475,7 @@ const AdminOrders = () => {
                         {item.image ? (
                           <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                         ) : (
-                          <span className="text-xl">📦</span>
+                          <span className="text-xs text-orange-400 font-semibold">N/A</span>
                         )}
                       </div>
                       <div className="flex-1">
@@ -453,7 +550,6 @@ const AdminOrders = () => {
                           : 'bg-cream border-orange-100 text-[#7A6A5A] hover:bg-orange-50'
                       }`}
                     >
-                      <span className="text-lg">{status.icon}</span>
                       <span className="font-semibold">{status.label}</span>
                     </button>
                   ))}
@@ -473,8 +569,7 @@ const AdminOrders = () => {
 
               <div className="bg-[#FFF4E6] rounded-2xl p-3 border border-orange-100">
                 <p className="text-xs text-[#A8998A] uppercase tracking-widest font-semibold mb-1">Current Status</p>
-                <p className="text-sm text-[#3D1A00] font-semibold inline-flex items-center gap-2">
-                  <span>{getStatusIcon(selectedOrder.orderStatus)}</span>
+                <p className="text-sm text-[#3D1A00] font-semibold">
                   {getStatusLabel(selectedOrder.orderStatus)}
                 </p>
               </div>

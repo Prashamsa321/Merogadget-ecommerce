@@ -11,6 +11,7 @@ const ProductsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [categories, setCategories] = useState([]);
+  const [sortBy, setSortBy] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
 
   const { user } = useAuth();
@@ -50,13 +51,19 @@ const ProductsPage = () => {
     }
   };
 
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = [...products.filter(product => {
     const matchesCategory = !selectedCategory ||
       (product.category && product.category.toLowerCase() === selectedCategory.toLowerCase());
     const matchesSearch = !searchTerm ||
       product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.description?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
+  })].sort((a, b) => {
+    if (sortBy === 'az') return (a.name || '').localeCompare(b.name || '');
+    if (sortBy === 'za') return (b.name || '').localeCompare(a.name || '');
+    if (sortBy === 'lowhigh') return (a.price || 0) - (b.price || 0);
+    if (sortBy === 'highlow') return (b.price || 0) - (a.price || 0);
+    return 0;
   });
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -146,7 +153,7 @@ const ProductsPage = () => {
             </div>
 
             {/* Category — with custom arrow */}
-            <div className="flex gap-2 shrink-0">
+            <div className="flex flex-wrap gap-2 shrink-0">
               <div className="relative">
                 <select
                   value={selectedCategory}
@@ -170,19 +177,41 @@ const ProductsPage = () => {
                     <option key={category} value={category}>{category}</option>
                   ))}
                 </select>
-                {/* Custom dropdown arrow */}
                 <svg
                   className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#3D1A00] pointer-events-none"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
-              {selectedCategory && (
+
+              {/* Sort dropdown */}
+              <div className="relative">
+                <select
+                  value={sortBy}
+                  onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
+                  className="appearance-none pl-5 pr-11 py-3 bg-white border border-orange-100 rounded-full text-sm text-[#3D1A00] focus:outline-none cursor-pointer transition-all duration-300
+                    shadow-[0_0_0_3px_rgba(241,90,41,0.06),0_2px_8px_rgba(241,90,41,0.10)]
+                    focus:border-orange-300
+                    focus:shadow-[0_0_0_4px_rgba(241,90,41,0.15),0_0_20px_rgba(241,90,41,0.25)]"
+                >
+                  <option value="">Sort By</option>
+                  <option value="az">A → Z</option>
+                  <option value="za">Z → A</option>
+                  <option value="lowhigh">Price: Low to High</option>
+                  <option value="highlow">Price: High to Low</option>
+                </select>
+                <svg
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#3D1A00] pointer-events-none"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+
+              {(selectedCategory || sortBy) && (
                 <button
-                  onClick={clearCategoryFilter}
+                  onClick={() => { clearCategoryFilter(); setSortBy(''); }}
                   className="px-4 py-3 bg-[#3D1A00] text-white rounded-full hover:bg-orange-600 transition-colors font-semibold text-sm"
                 >
                   Clear

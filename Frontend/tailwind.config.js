@@ -85,6 +85,15 @@ export default {
         'card': '0 2px 4px rgba(61, 26, 0, 0.04), 0 6px 16px rgba(61, 26, 0, 0.06)',
         'hover': '0 6px 16px rgba(61, 26, 0, 0.08), 0 12px 32px rgba(61, 26, 0, 0.08)',
       },
+      keyframes: {
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-50%)' },
+        }
+      },
+      animation: {
+        marquee: 'marquee 30s linear infinite',
+      }
     },
   },
   plugins: [],

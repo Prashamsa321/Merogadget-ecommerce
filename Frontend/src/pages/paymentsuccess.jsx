@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader2, ShoppingBag } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import { useCart } from '../context/CartContext';
 import api from '../services/api';
 
 const PaymentSuccess = () => {
@@ -13,6 +14,7 @@ const PaymentSuccess = () => {
   const [message, setMessage] = useState('');
   const [orderDetails, setOrderDetails] = useState(null);
   const [redirectCountdown, setRedirectCountdown] = useState(5);
+  const { fetchCart } = useCart();
 
   const hasVerified = useRef(false);
 
@@ -40,6 +42,9 @@ const PaymentSuccess = () => {
           success('Payment successful! Your order has been confirmed.');
 
           sessionStorage.removeItem('pendingOrderId');
+
+          // Re-sync cart from backend so items are cleared immediately
+          await fetchCart();
 
           let countdown = 5;
           const interval = setInterval(() => {

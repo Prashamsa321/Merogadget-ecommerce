@@ -8,7 +8,7 @@ const generateToken = (id) => {
   });
 };
 
-// Register function
+// Register
 export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -37,7 +37,8 @@ export const register = async (req, res) => {
           _id: user._id,
           name: user.name,
           email: user.email,
-          role: user.role
+          role: user.role,
+          photo: user.photo || ''
         }
       });
     } else {
@@ -55,7 +56,7 @@ export const register = async (req, res) => {
   }
 };
 
-// Login function
+// Login
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -84,7 +85,8 @@ export const login = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        photo: user.photo || ''
       }
     });
   } catch (error) {
@@ -100,21 +102,26 @@ export const login = async (req, res) => {
 export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
         message: 'User not found'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       user: {
         _id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        phone: user.phone || '',
+        address: user.address || '',
+        city: user.city || '',
+        postalCode: user.postalCode || '',
+        photo: user.photo || ''
       }
     });
   } catch (error) {
@@ -126,12 +133,12 @@ export const getMe = async (req, res) => {
   }
 };
 
-// Update user profile
+// Update profile
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { name, phone, address } = req.body;
-    
+    const { name, phone, address, city, postalCode, photo } = req.body;
+
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
@@ -139,13 +146,16 @@ export const updateProfile = async (req, res) => {
         message: 'User not found'
       });
     }
-    
-    if (name) user.name = name;
-    if (phone) user.phone = phone;
-    if (address) user.address = address;
-   
+
+    if (name !== undefined) user.name = name;
+    if (phone !== undefined) user.phone = phone;
+    if (address !== undefined) user.address = address;
+    if (city !== undefined) user.city = city;
+    if (postalCode !== undefined) user.postalCode = postalCode;
+    if (photo !== undefined) user.photo = photo;
+
     await user.save();
-    
+
     res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
@@ -154,8 +164,11 @@ export const updateProfile = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        phone: user.phone,
-        address: user.address,
+        phone: user.phone || '',
+        address: user.address || '',
+        city: user.city || '',
+        postalCode: user.postalCode || '',
+        photo: user.photo || ''
       }
     });
   } catch (error) {
@@ -168,15 +181,12 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-// Change password - FIXED VERSION
+// Change password
 export const changePassword = async (req, res) => {
   try {
     const userId = req.user._id;
     const { currentPassword, newPassword } = req.body;
-    
-    console.log('Change password request for user:', userId);
 
-    // Validate input
     if (!currentPassword || !newPassword) {
       return res.status(400).json({
         success: false,
@@ -191,7 +201,6 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Get user with password
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
@@ -200,7 +209,6 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Verify current password
     const isPasswordMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isPasswordMatch) {
       return res.status(401).json({
@@ -209,15 +217,11 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    // Hash new password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    // Update password
     user.password = hashedPassword;
     await user.save();
-
-    console.log('Password changed successfully for user:', user.email);
 
     res.status(200).json({
       success: true,
@@ -233,13 +237,12 @@ export const changePassword = async (req, res) => {
   }
 };
 
-
 // Update user role (admin only)
 export const updateUserRole = async (req, res) => {
   try {
     const { id } = req.params;
     const { role } = req.body;
-    
+
     const user = await User.findById(id);
     if (!user) {
       return res.status(404).json({
@@ -247,24 +250,24 @@ export const updateUserRole = async (req, res) => {
         message: 'User not found'
       });
     }
-    
+
     if (req.user._id.toString() === id) {
       return res.status(400).json({
         success: false,
         message: 'You cannot change your own role'
       });
     }
-    
+
     if (!['user', 'admin'].includes(role)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid role'
       });
     }
-    
+
     user.role = role;
     await user.save();
-    
+
     res.status(200).json({
       success: true,
       message: 'User role updated successfully',
@@ -289,7 +292,7 @@ export const updateUserRole = async (req, res) => {
 export const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const user = await User.findById(id);
     if (!user) {
       return res.status(404).json({
@@ -297,16 +300,16 @@ export const deleteUser = async (req, res) => {
         message: 'User not found'
       });
     }
-    
+
     if (req.user._id.toString() === id) {
       return res.status(400).json({
         success: false,
         message: 'You cannot delete your own account'
       });
     }
-    
+
     await User.findByIdAndDelete(id);
-    
+
     res.status(200).json({
       success: true,
       message: 'User deleted successfully'
@@ -316,6 +319,21 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error deleting user',
+      error: error.message
+    });
+  }
+};
+
+// Get all users (admin only)
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}).select('-password').sort({ createdAt: -1 });
+    res.status(200).json({ success: true, users });
+  } catch (error) {
+    console.error('Get users error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching users',
       error: error.message
     });
   }

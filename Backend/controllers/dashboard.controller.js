@@ -138,6 +138,30 @@ export const getDashboardStats = async (req, res) => {
 
     const last7Subs = subscriberGrowth.reduce((sum, d) => sum + d.count, 0);
 
+    // ── Top 5 Buying Customers ──
+    const topCustomers = await Order.aggregate([
+      { $match: { orderStatus: { $ne: 'Cancelled' } } },
+      { $group: { _id: '$userId', totalSpent: { $sum: '$totalAmount' }, totalOrders: { $sum: 1 } } },
+      { $sort: { totalSpent: -1 } },
+      { $limit: 5 },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          name: { $ifNull: ['$user.name', 'Unknown'] },
+          totalSpent: 1,
+          totalOrders: 1
+        }
+      }
+    ]);
+
     res.status(200).json({
       success: true,
       totals: {
@@ -151,6 +175,7 @@ export const getDashboardStats = async (req, res) => {
       revenueTrend,
       orderStatus,
       topCategories,
+      topCustomers,
       subscriberGrowth,
       subscriberStats: {
         total: totalSubscribers,

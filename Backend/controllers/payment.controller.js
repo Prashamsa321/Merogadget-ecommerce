@@ -5,7 +5,7 @@ import Order from '../models/Order.js';
 // Get Khalti key from env with fallback (dev sandbox key)
 const KHALTI_KEY = process.env.KHALTI_SECRET_KEY || "live_secret_key_68791341fdd94846a146f0457ff7b455";
 const KHALTI_BASE = process.env.KHALTI_BASE_URL || "https://dev.khalti.com/api/v2";
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3001";
 
 export const khaltiPayment = async (req, res) => {
   try {
@@ -69,7 +69,6 @@ export const verifyKhaltiPayment = async (req, res) => {
       });
     }
 
-    // ✅ Idempotency check — if this pidx was already verified, return the order
     const existingOrder = await Order.findOne({ pidx });
     if (existingOrder) {
       return res.status(200).json({
@@ -104,7 +103,6 @@ export const verifyKhaltiPayment = async (req, res) => {
         });
       }
 
-      // Convert cart items → order items with proper types
       const orderItems = cart.items.map(item => ({
         productId: item.productId,
         name: item.name || 'Product',

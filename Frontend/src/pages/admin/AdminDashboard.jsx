@@ -218,9 +218,9 @@ const AdminDashboard = () => {
   const statsCards = [
     { title: 'Total Products', value: stats.totals.totalProducts, icon: Package, color: 'from-blue-500 to-blue-600', link: '/admin/products', prefix: '' },
     { title: 'Total Orders', value: stats.totals.totalOrders, icon: ShoppingCart, color: 'from-orange-500 to-orange-600', link: '/admin/orders', prefix: '' },
-    { title: 'Total Users', value: stats.totals.totalUsers, icon: Users, color: 'from-purple-500 to-purple-600', link: '/admin/users', prefix: '' },
+    { title: 'Total Customers', value: stats.totals.totalUsers, icon: Users, color: 'from-purple-500 to-purple-600', link: '/admin/users', prefix: '' },
     { title: 'Total Revenue', value: stats.totals.totalRevenue, icon: DollarSign, color: 'from-green-500 to-green-600', link: '/admin/analytics', prefix: 'रु ' },
-    { title: 'Subscribers', value: stats.totals.totalSubscribers, icon: Mail, color: 'from-pink-500 to-pink-600', link: '/admin', prefix: '' },
+    { title: 'Subscribers', value: stats.totals.totalSubscribers, icon: Mail, color: 'from-pink-500 to-pink-600', link: '#subscribers', prefix: '' },
   ];
 
   const maxSubCount = Math.max(...stats.subscriberGrowth.map(d => d.count), 1);
@@ -239,15 +239,14 @@ const AdminDashboard = () => {
       `}</style>
 
       {/* Welcome Section */}
-      <div className="bg-white rounded-3xl p-6 md:p-8 border border-orange-100 shadow-soft animate-slideUp">
-        <div className="flex items-center gap-5">
-          
+      <div className="bg-white rounded-3xl p-4 md:p-5 border border-orange-100 shadow-soft animate-slideUp">
+        <div className="flex items-center gap-4">
           <div>
-            <p className="eyebrow mb-1">Welcome back</p>
-            <h1 className="text-2xl md:text-3xl font-bold text-[#3D1A00]">
+            <p className="eyebrow mb-0.5 text-xs">Welcome back</p>
+            <h1 className="text-xl md:text-2xl font-bold text-[#3D1A00]">
               Hello, {user?.name}!
             </h1>
-            <p className="text-[#7A6A5A] mt-1 text-sm md:text-base">
+            <p className="text-[#7A6A5A] mt-0.5 text-xs md:text-sm">
               Here's what's happening with your store today.
             </p>
           </div>
@@ -259,38 +258,38 @@ const AdminDashboard = () => {
         {statsCards.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <Link
+            <a
+              href={stat.link}
               key={index}
-              to={stat.link}
               className="group bg-white rounded-3xl overflow-hidden hover:shadow-hover transition-all duration-300 hover:-translate-y-1 border border-orange-100 block animate-slideUp"
               style={{ animationDelay: `${index * 80}ms`, opacity: 0 }}
             >
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-2xl flex items-center justify-center shadow-md group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
-                    <Icon className="w-6 h-6 text-white" strokeWidth={2.2} />
+              <div className="p-4 md:p-5">
+                <div className="flex items-start justify-between mb-3">
+                  <div className={`w-10 h-10 bg-gradient-to-br ${stat.color} rounded-2xl flex items-center justify-center shadow-md group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
+                    <Icon className="w-5 h-5 text-white" strokeWidth={2.2} />
                   </div>
                 </div>
-                <p className="text-xs text-[#A8998A] uppercase tracking-widest font-semibold mb-1">
+                <p className="text-[10px] text-[#A8998A] uppercase tracking-widest font-semibold mb-1">
                   {stat.title}
                 </p>
-                <p className="text-3xl font-bold text-[#3D1A00]">
+                <p className="text-xl md:text-2xl font-bold text-[#3D1A00]">
                   {stat.prefix}<CountUp end={stat.value} />
                 </p>
-                <div className="mt-4 text-sm text-orange-600 font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
+                <div className="mt-3 text-xs text-orange-600 font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
                   View Details
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
               </div>
-            </Link>
+            </a>
           );
         })}
       </div>
 
       {/* Subscriber Growth + Recent */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+      <div id="subscribers" className="grid grid-cols-1 lg:grid-cols-5 gap-5">
         <div className="lg:col-span-3 bg-white rounded-3xl p-6 md:p-8 border border-orange-100 shadow-soft animate-slideUp">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
             <div>
@@ -432,6 +431,39 @@ const AdminDashboard = () => {
             <p className="text-sm text-[#7A6A5A] mt-0.5">By units sold</p>
           </div>
           <TopCategoriesBars data={stats.topCategories} />
+        </div>
+      </div>
+
+      {/* Top Customers */}
+      <div className="bg-white rounded-3xl p-6 md:p-8 border border-orange-100 shadow-soft animate-slideUp">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="font-bold text-[#3D1A00] text-lg">Top 5 Customers</h3>
+            <p className="text-sm text-[#7A6A5A] mt-0.5">By total spent</p>
+          </div>
+          <Users className="text-orange-400" size={24} />
+        </div>
+        <div className="space-y-4">
+          {stats.topCustomers && stats.topCustomers.length > 0 ? (
+            stats.topCustomers.map((cust, i) => (
+              <div key={i} className="flex items-center justify-between p-3 rounded-2xl border border-orange-50 bg-[#FFFAF5] hover:border-orange-200 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 text-white flex items-center justify-center font-bold text-lg">
+                    {i + 1}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-[#3D1A00] truncate max-w-[120px] sm:max-w-[180px]">{cust.name}</p>
+                    <p className="text-xs text-[#7A6A5A]">{cust.totalOrders} order{cust.totalOrders !== 1 ? 's' : ''}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-orange-600">रु{cust.totalSpent?.toFixed(0)}</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center text-[#A8998A] text-sm py-8">No customer data yet</div>
+          )}
         </div>
       </div>
 

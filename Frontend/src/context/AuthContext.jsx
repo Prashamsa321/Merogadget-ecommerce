@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
     const loadUser = () => {
       const storedToken = localStorage.getItem('token')
       const storedUser = localStorage.getItem('user')
-      
+
       if (storedToken && storedUser) {
         try {
           const userData = JSON.parse(storedUser)
@@ -46,23 +46,23 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await api.post('/auth/login', { email, password })
-      
+
       const { token, user } = response.data
-      
+
       localStorage.setItem('token', token)
       localStorage.setItem('user', JSON.stringify(user))
       setToken(token)
       setUser(user)
       setIsAuthenticated(true)
-      
+
       api.defaults.headers.common['Authorization'] = 'Bearer ' + token
-      
+
       return { success: true, user }
     } catch (error) {
       console.error('Login error:', error.response?.data || error.message)
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Login failed' 
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Login failed'
       }
     }
   }
@@ -71,36 +71,42 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password) => {
     try {
       const response = await api.post('/auth/register', { name, email, password })
-      
+
       const { token, user } = response.data
-      
+
       localStorage.setItem('token', token)
       localStorage.setItem('user', JSON.stringify(user))
       setToken(token)
       setUser(user)
       setIsAuthenticated(true)
-      
+
       api.defaults.headers.common['Authorization'] = 'Bearer ' + token
-      
+
       return { success: true, user }
     } catch (error) {
       console.error('Register error:', error.response?.data || error.message)
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Registration failed' 
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Registration failed'
       }
     }
+  }
+
+  // Update user (persists to localStorage + updates state)
+  const updateUser = (updatedUser) => {
+    localStorage.setItem('user', JSON.stringify(updatedUser))
+    setUser(updatedUser)
   }
 
   // Logout function
   const logout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
-    
+
     setToken(null)
     setUser(null)
     setIsAuthenticated(false)
-    
+
     delete api.defaults.headers.common['Authorization']
   }
 
@@ -111,7 +117,9 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     register,
-    logout
+    logout,
+    setUser,
+    updateUser
   }
 
   return (

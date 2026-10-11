@@ -38,6 +38,7 @@ const DEFAULT_CATEGORY_IMAGE = 'https://images.unsplash.com/photo-1518770660439-
 
 const HomePage = () => {
   const [featuredProducts, setFeaturedProducts] = useState([])
+  const [latestProducts, setLatestProducts] = useState([])
   const [topCategories, setTopCategories] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -52,6 +53,9 @@ const HomePage = () => {
         const products = await productService.getAllProducts()
         const productsArray = Array.isArray(products) ? products : []
         setFeaturedProducts(productsArray.slice(0, 4))
+
+        const latest = [...productsArray].reverse().slice(0, 4);
+        setLatestProducts(latest);
 
         const categoryMap = new Map()
         productsArray.forEach((p) => {
@@ -193,6 +197,47 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* ═══════════ FEATURED PRODUCTS ═══════════ */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 xl:px-16">
+          <div className="text-center mb-12">
+            <p className="text-xs font-semibold text-orange-600 uppercase tracking-widest mb-2">Featured</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#1F1A16] mb-3">Trending right now</h2>
+            <p className="text-[#6B6258]">Hand-picked just for you</p>
+          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl p-4 animate-pulse border border-orange-100">
+                  <div className="h-48 bg-orange-50 rounded-xl mb-4"></div>
+                  <div className="h-4 bg-orange-100 rounded-full mb-2 w-3/4"></div>
+                  <div className="h-4 bg-orange-100 rounded-full w-1/2"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {featuredProducts.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
+            </div>
+          )}
+
+          {!loading && featuredProducts.length > 0 && (
+            <div className="text-center mt-12">
+              <Link
+                to="/products"
+                className="inline-flex items-center gap-2 bg-orange-600 text-white px-8 py-4 rounded-full font-semibold hover:bg-orange-700 transition-all duration-300 shadow-lg shadow-orange-500/20 active:scale-95 group"
+              >
+                View All Products
+                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* ═══════════ SHOP BY CATEGORY ═══════════ */}
       <section className="py-16 bg-[#FFF4E6]">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 xl:px-16">
@@ -250,13 +295,13 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ═══════════ FEATURED PRODUCTS ═══════════ */}
+      {/* ═══════════ LATEST PRODUCTS ═══════════ */}
       <section className="py-16 bg-white">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 xl:px-16">
           <div className="text-center mb-12">
-            <p className="text-xs font-semibold text-orange-600 uppercase tracking-widest mb-2">Featured</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-[#1F1A16] mb-3">Trending right now</h2>
-            <p className="text-[#6B6258]">Hand-picked just for you</p>
+            <p className="text-xs font-semibold text-orange-600 uppercase tracking-widest mb-2">New Arrivals</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#1F1A16] mb-3">Latest Products</h2>
+            <p className="text-[#6B6258]">Fresh off the line, just for you</p>
           </div>
 
           {loading ? (
@@ -271,23 +316,31 @@ const HomePage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {featuredProducts.map((product) => (
+              {latestProducts.map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}
             </div>
           )}
+        </div>
+      </section>
 
-          {!loading && featuredProducts.length > 0 && (
-            <div className="text-center mt-12">
-              <Link
-                to="/products"
-                className="inline-flex items-center gap-2 bg-orange-600 text-white px-8 py-4 rounded-full font-semibold hover:bg-orange-700 transition-all duration-300 shadow-lg shadow-orange-500/20 active:scale-95 group"
+      {/* ═══════════ CATEGORY MARQUEE ═══════════ */}
+      <section className="py-10 bg-orange-50 overflow-hidden border-y border-orange-100">
+        <div className="w-full relative flex items-center">
+          <div className="flex w-max animate-marquee whitespace-nowrap">
+            {[...topCategories, ...topCategories].map((cat, i) => (
+              <Link 
+                key={i}
+                to={`/products?category=${encodeURIComponent(cat.name)}`}
+                className="mx-6 flex flex-col items-center gap-3 group"
               >
-                View All Products
-                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-white shadow-md group-hover:border-orange-400 group-hover:scale-105 transition-all duration-300">
+                  <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
+                </div>
+                <span className="font-semibold text-[#1F1A16] group-hover:text-orange-600 transition-colors">{cat.name}</span>
               </Link>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
       </section>
 

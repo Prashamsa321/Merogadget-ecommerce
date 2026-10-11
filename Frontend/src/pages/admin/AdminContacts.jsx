@@ -57,50 +57,24 @@ const AdminContacts = () => {
   return (
     <div className="space-y-6">
 
-      {/* Header */}
+      {/* Header + inline stats */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <p className="eyebrow mb-1">Inbox</p>
-          <h1 className="text-2xl md:text-3xl font-bold text-[#3D1A00]">Contact Messages</h1>
-          <p className="text-[#7A6A5A] mt-1 text-sm">View customer inquiries</p>
-        </div>
-        <div className="text-sm text-[#7A6A5A]">
-          Total: <span className="text-[#3D1A00] font-bold">{contacts.length}</span> messages
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl shadow-soft p-5 border border-orange-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-11 h-11 bg-blue-50 rounded-2xl flex items-center justify-center text-xl">💬</div>
-          </div>
-          <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
-          <div className="text-xs text-[#7A6A5A] mt-1 uppercase tracking-widest font-semibold">Total</div>
+        <div className="flex-shrink-0 text-center md:text-left">
+          <p className="eyebrow mb-1 text-xs">Inbox</p>
+          <h1 className="text-xl md:text-2xl font-bold text-[#3D1A00]">Contact Messages</h1>
+          <p className="text-xs text-[#7A6A5A] mt-0.5">View customer inquiries</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-soft p-5 border border-orange-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-11 h-11 bg-amber-50 rounded-2xl flex items-center justify-center text-xl">⏳</div>
+        <div className="w-full md:w-auto flex items-center gap-3 bg-white rounded-2xl px-4 py-2.5 border border-orange-100 shadow-soft">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[#A8998A] uppercase tracking-widest font-semibold">Total</span>
+            <span className="text-lg font-bold text-blue-600">{stats.total}</span>
           </div>
-          <div className="text-2xl font-bold text-amber-600">{stats.pending}</div>
-          <div className="text-xs text-[#7A6A5A] mt-1 uppercase tracking-widest font-semibold">Pending</div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-soft p-5 border border-orange-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-11 h-11 bg-orange-50 rounded-2xl flex items-center justify-center text-xl">👁️</div>
+          <div className="w-px h-6 bg-orange-100"></div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[#A8998A] uppercase tracking-widest font-semibold">Read</span>
+            <span className="text-lg font-bold text-orange-600">{stats.read}</span>
           </div>
-          <div className="text-2xl font-bold text-orange-600">{stats.read}</div>
-          <div className="text-xs text-[#7A6A5A] mt-1 uppercase tracking-widest font-semibold">Read</div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-soft p-5 border border-orange-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-11 h-11 bg-green-50 rounded-2xl flex items-center justify-center text-xl">✅</div>
-          </div>
-          <div className="text-2xl font-bold text-green-600">{stats.replied}</div>
-          <div className="text-xs text-[#7A6A5A] mt-1 uppercase tracking-widest font-semibold">Replied</div>
         </div>
       </div>
 
@@ -120,7 +94,6 @@ const AdminContacts = () => {
               {contacts.length === 0 ? (
                 <tr>
                   <td colSpan="4" className="px-6 py-12 text-center text-[#7A6A5A]">
-                    <div className="text-5xl mb-3">📭</div>
                     <p className="font-semibold text-[#3D1A00]">No messages found</p>
                     <p className="text-sm mt-1">New customer inquiries will appear here</p>
                   </td>
@@ -151,12 +124,8 @@ const AdminContacts = () => {
                     <td className="px-6 py-4">
                       <button
                         onClick={() => handleViewContact(contact)}
-                        className="text-orange-600 hover:text-orange-700 transition-colors flex items-center gap-1 font-semibold text-sm px-3 py-1.5 rounded-full hover:bg-orange-50"
+                        className="text-orange-600 hover:text-orange-700 transition-colors font-semibold text-sm px-3 py-1.5 rounded-full hover:bg-orange-50"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
                         View
                       </button>
                     </td>
@@ -168,7 +137,7 @@ const AdminContacts = () => {
         </div>
       </div>
 
-      {/* View Contact Modal — z-[100] to cover sticky header */}
+      {/* View Contact Modal */}
       {selectedContact && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-[#3D1A00]/70 backdrop-blur-md p-4"
@@ -180,8 +149,7 @@ const AdminContacts = () => {
           >
             {/* Modal Header */}
             <div className="sticky top-0 bg-white border-b border-orange-100 p-5 flex justify-between items-center z-10 rounded-t-3xl">
-              <h3 className="text-lg font-bold text-[#3D1A00] flex items-center gap-2">
-                <span className="text-xl">📧</span>
+              <h3 className="text-lg font-bold text-[#3D1A00]">
                 Message Details
               </h3>
               <button
@@ -196,8 +164,7 @@ const AdminContacts = () => {
 
               {/* From */}
               <div className="grid grid-cols-[110px_1fr] gap-3 items-start">
-                <label className="text-xs font-bold text-[#A8998A] uppercase tracking-widest flex items-center gap-2 pt-1">
-                  <span className="text-base">👤</span>
+                <label className="text-xs font-bold text-[#A8998A] uppercase tracking-widest pt-1">
                   From
                 </label>
                 <div>
@@ -208,8 +175,7 @@ const AdminContacts = () => {
 
               {/* Subject */}
               <div className="grid grid-cols-[110px_1fr] gap-3 items-start">
-                <label className="text-xs font-bold text-[#A8998A] uppercase tracking-widest flex items-center gap-2 pt-1">
-                  <span className="text-base">📌</span>
+                <label className="text-xs font-bold text-[#A8998A] uppercase tracking-widest pt-1">
                   Subject
                 </label>
                 <p className="text-[#3D1A00] font-semibold break-words">{selectedContact.subject}</p>
@@ -217,8 +183,7 @@ const AdminContacts = () => {
 
               {/* Date */}
               <div className="grid grid-cols-[110px_1fr] gap-3 items-start">
-                <label className="text-xs font-bold text-[#A8998A] uppercase tracking-widest flex items-center gap-2 pt-1">
-                  <span className="text-base">📅</span>
+                <label className="text-xs font-bold text-[#A8998A] uppercase tracking-widest pt-1">
                   Date
                 </label>
                 <p className="text-[#5C4B3A] break-words">
@@ -228,8 +193,7 @@ const AdminContacts = () => {
 
               {/* Message */}
               <div className="pt-2">
-                <label className="text-xs font-bold text-[#A8998A] uppercase tracking-widest flex items-center gap-2 mb-3">
-                  <span className="text-base">💬</span>
+                <label className="text-xs font-bold text-[#A8998A] uppercase tracking-widest mb-3 block">
                   Message
                 </label>
                 <div className="bg-[#FFF4E6] rounded-2xl p-4 border border-orange-100">
