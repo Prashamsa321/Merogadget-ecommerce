@@ -115,7 +115,7 @@ const AdminProducts = () => {
           <p className="text-xs text-[#7A6A5A] mt-0.5">Total: <span className="font-bold text-[#3D1A00]">{filteredProducts.length}</span></p>
         </div>
 
-        <div className="w-full md:w-auto flex flex-col sm:flex-row items-center gap-3 bg-white rounded-2xl p-3 border border-orange-100 shadow-soft">
+        <div className="flex-1 w-full md:w-auto flex flex-col sm:flex-row justify-end items-center gap-3 bg-white rounded-2xl p-3 border border-orange-100 shadow-soft">
           <div className="w-full sm:w-64 md:w-72 relative">
             <input
               type="text"
