@@ -78,6 +78,22 @@ app.use('/api/subscribers', subscriberRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
 
+// Root & health check routes
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'API is working',
+    environment: process.env.NODE_ENV || 'development'
+  })
+})
+
+app.get('/api', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'API is working'
+  })
+})
+
 // Test route
 app.get('/api/test', (req, res) => {
   res.json({ message: 'API is working' })
