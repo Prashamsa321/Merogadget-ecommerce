@@ -38,7 +38,9 @@ const AdminUsers = () => {
     .filter(user => user.role !== 'admin')
     .filter(user =>
       user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.address?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
   const openRoleModal = (user) => {
@@ -131,7 +133,7 @@ const AdminUsers = () => {
           <div className="w-full sm:w-64 md:w-72 relative">
             <input
               type="text"
-              placeholder="Search users by name or email..."
+              placeholder="Search by name, email, phone, address..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-2 pl-10 bg-cream border border-orange-100 rounded-full text-sm text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
@@ -149,6 +151,8 @@ const AdminUsers = () => {
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-bold text-orange-700 uppercase tracking-widest">User</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-orange-700 uppercase tracking-widest">Email</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-orange-700 uppercase tracking-widest">Phone</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-orange-700 uppercase tracking-widest">Address</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-orange-700 uppercase tracking-widest">Role</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-orange-700 uppercase tracking-widest">Member Since</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-orange-700 uppercase tracking-widest">Actions</th>
@@ -157,7 +161,7 @@ const AdminUsers = () => {
             <tbody className="bg-white divide-y divide-orange-50">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-[#7A6A5A]">
+                  <td colSpan="7" className="px-6 py-12 text-center text-[#7A6A5A]">
                     <p className="font-semibold text-[#3D1A00]">No users found</p>
                     {searchTerm && (
                       <button
@@ -174,10 +178,25 @@ const AdminUsers = () => {
                   <tr key={user._id} className="hover:bg-orange-50/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center shadow-md">
-                          <span className="text-white font-bold">
-                            {user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
-                          </span>
+                        <div className="h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-orange-500 to-[#C2410C] flex items-center justify-center shadow-md shrink-0">
+                          {user.photo ? (
+                            <img
+                              src={user.photo}
+                              alt={user.name || 'User'}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                e.currentTarget.parentElement.innerText =
+                                  user.name?.charAt(0).toUpperCase() ||
+                                  user.email?.charAt(0).toUpperCase() ||
+                                  'U';
+                              }}
+                            />
+                          ) : (
+                            <span className="text-white font-bold">
+                              {user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
+                            </span>
+                          )}
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-[#3D1A00]">{user.name || 'N/A'}</p>
@@ -186,6 +205,22 @@ const AdminUsers = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[#7A6A5A]">
                       {user.email}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#7A6A5A]">
+                      {user.phone ? (
+                        <span className="font-mono">{user.phone}</span>
+                      ) : (
+                        <span className="text-[#C4B5A5] italic">Not provided</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-[#7A6A5A] max-w-[200px]">
+                      {user.address ? (
+                        <span className="line-clamp-2 break-words" title={user.address}>
+                          {user.address}
+                        </span>
+                      ) : (
+                        <span className="text-[#C4B5A5] italic">Not provided</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {user.role === 'admin' ? (

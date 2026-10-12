@@ -1,46 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { productService } from '../../services/productService';
+import { useProducts } from '../../context/ProductContext';
 import { ShoppingBag, ChevronDown, ArrowRight, Tag } from 'lucide-react';
 
 const CategoriesDropdown = () => {
+  const { products, loading } = useProducts();
   const [categories, setCategories] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
-    fetchCategoriesFromProducts();
-  }, []);
+    if (!products || products.length === 0) return
 
-  const fetchCategoriesFromProducts = async () => {
-    setLoading(true);
-    try {
-      // Fetch all products and derive unique categories
-      const products = await productService.getAllProducts();
-      const productsArray = Array.isArray(products) ? products : [];
+    const categoryMap = new Map()
+    products.forEach((p) => {
+      const cat = p.category?.trim()
+      if (cat) {
+        categoryMap.set(cat, (categoryMap.get(cat) || 0) + 1)
+      }
+    })
 
-      // Build a map of category -> product count
-      const categoryMap = new Map();
-      productsArray.forEach((p) => {
-        const cat = p.category?.trim();
-        if (cat) {
-          categoryMap.set(cat, (categoryMap.get(cat) || 0) + 1);
-        }
-      });
+    const categoriesList = Array.from(categoryMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => a.name.localeCompare(b.name))
 
-      // Convert to array, sorted alphabetically, with count
-      const categoriesList = Array.from(categoryMap.entries())
-        .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => a.name.localeCompare(b.name));
-
-      setCategories(categoriesList);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setCategories(categoriesList)
+  }, [products])
 
   useEffect(() => {
     const handleClickOutside = (event) => {

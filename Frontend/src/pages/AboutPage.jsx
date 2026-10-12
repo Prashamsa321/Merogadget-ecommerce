@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import {
     ShieldCheck, Truck, CreditCard, Shield, Phone, Star,
     Smartphone, Laptop, Headphones, Watch, Gamepad2, Home,
-    Target, Eye, Sparkles, TrendingUp, Users, Heart
+    Target, Eye, Sparkles, TrendingUp, Users, Heart,
+    Quote
 } from 'lucide-react';
 
 const AboutPage = () => {
@@ -75,7 +76,7 @@ const AboutPage = () => {
         { icon: ShieldCheck, title: "100% Genuine Products", desc: "Official warranty on all electronics" },
         { icon: Truck, title: "Free Express Shipping", desc: "On orders over NPR 5,000" },
         { icon: CreditCard, title: "Easy EMI Options", desc: "Flexible payment plans available" },
-        { icon: Shield, title: "7-Day Replacement", desc: "Hassle-free returns & refunds" },
+        { icon: Shield, title: "7-Day Replacement", desc: "Hassle-free returns and refunds" },
         { icon: Phone, title: "24/7 Customer Support", desc: "Always here to help you" },
         { icon: Star, title: "15K+ Happy Customers", desc: "Trusted by thousands" }
     ];
@@ -84,15 +85,20 @@ const AboutPage = () => {
         { icon: Smartphone, title: "Smartphones", desc: "Latest iPhone, Samsung, OnePlus" },
         { icon: Laptop, title: "Laptops", desc: "Gaming, Business, Student laptops" },
         { icon: Headphones, title: "Audio Devices", desc: "Headphones, Speakers, Earbuds" },
-        { icon: Watch, title: "Smart Watches", desc: "Fitness & Lifestyle trackers" },
+        { icon: Watch, title: "Smart Watches", desc: "Fitness and Lifestyle trackers" },
         { icon: Gamepad2, title: "Gaming Gear", desc: "Consoles, Controllers, Accessories" },
-        { icon: Home, title: "Smart Home", desc: "IoT devices & home automation" }
+        { icon: Home, title: "Smart Home", desc: "IoT devices and home automation" }
     ];
 
     const teamMembers = [
-        { name: "Prashamsa Lamsal", role: "Founder & CEO", initial: "P", photo: "/prashamsa.jpg", bio: "Leading the vision of MeroGadget to transform the way people discover, explore, and shop for technology through quality products, convenience, and trust." },
-        { name: "Aarav Shrestha", role: "Chief Technology Officer", initial: "A", photo: "https://i.pravatar.cc/300?img=12", bio: "Driving digital innovation by building a fast, secure, and seamless shopping platform that connects customers with the latest technology." },
-        { name: "Riya Karki", role: "Head of Operations", initial: "R", photo: "https://i.pravatar.cc/300?img=45", bio: "Overseeing every step of the customer journey, from order processing to delivery, with a commitment to reliability, efficiency, and exceptional service." }
+        {
+            name: "Prashamsa Lamsal",
+            role: "Founder & CEO",
+            initial: "P",
+            photo: "/prashamsa.jpg",
+            bio: "Founded MeroGadget in 2020 with a simple goal: to make genuine technology accessible to every Nepali. Combining a passion for innovation with a belief that quality products and honest service should be within everyone's reach, Prashamsa leads MeroGadget with a focus on trust, transparency, and delivering real value to customers across Nepal.",
+            quote: "Technology should empower people, not confuse them. Every product we sell carries our reputation with it."
+        }
     ];
 
     useEffect(() => {
@@ -112,11 +118,12 @@ const AboutPage = () => {
     return (
         <div className="overflow-x-hidden bg-cream">
 
+            {/* ═══════════ ABOUT / HERO ═══════════ */}
             <section className="relative pt-8 pb-16 md:pt-12 md:pb-24 bg-gradient-to-br from-[#FFF4E6] via-cream to-[#FFE8D6] overflow-hidden">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-orange-200/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
                 <div className="absolute bottom-0 left-0 w-72 h-72 bg-orange-300/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3 pointer-events-none"></div>
 
-                <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 xl:px-16 relative">
+                <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-16 relative">
                     <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
                         <div className="order-2 lg:order-1">
                             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur rounded-full border border-orange-200 mb-6 shadow-sm">
@@ -141,43 +148,18 @@ const AboutPage = () => {
                                 <p>
                                     We offer a wide range of gadgets and electronics to meet your everyday needs,
                                     combining quality products, reliable service, and a seamless shopping experience.
-                                    Our commitment goes beyond selling products—we aim to build lasting relationships through trust,
+                                    Our commitment goes beyond selling products — we aim to build lasting relationships through trust,
                                     transparency, and dependable customer support.
                                 </p>
                                 <p>
                                     At MeroGadget, your satisfaction inspires us to deliver better technology and better experiences every day.
                                 </p>
-
                             </div>
 
                             <div className="mt-6 mb-8 inline-block bg-gradient-to-r from-orange-600 to-orange-500 text-white px-5 py-3 rounded-2xl shadow-lg shadow-orange-500/20">
                                 <p className="text-sm md:text-base font-bold tracking-wide">
                                     MeroGadget — Technology You Trust. Quality You Deserve.
                                 </p>
-                            </div>
-
-                            <div className="grid grid-cols-3 gap-3 md:gap-4 max-w-lg">
-                                <div className="bg-white/90 backdrop-blur rounded-2xl p-4 border border-orange-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <Sparkles className="w-4 h-4 text-orange-500" strokeWidth={2.5} />
-                                        <div className="text-2xl md:text-3xl font-bold text-[#3D1A00]">2020</div>
-                                    </div>
-                                    <div className="text-xs md:text-sm text-[#7A6A5A] font-medium">Founded</div>
-                                </div>
-                                <div className="bg-white/90 backdrop-blur rounded-2xl p-4 border border-orange-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <Users className="w-4 h-4 text-orange-500" strokeWidth={2.5} />
-                                        <div className="text-2xl md:text-3xl font-bold text-[#3D1A00]">15K+</div>
-                                    </div>
-                                    <div className="text-xs md:text-sm text-[#7A6A5A] font-medium">Customers</div>
-                                </div>
-                                <div className="bg-white/90 backdrop-blur rounded-2xl p-4 border border-orange-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <TrendingUp className="w-4 h-4 text-orange-500" strokeWidth={2.5} />
-                                        <div className="text-2xl md:text-3xl font-bold text-[#3D1A00]">500+</div>
-                                    </div>
-                                    <div className="text-xs md:text-sm text-[#7A6A5A] font-medium">Products</div>
-                                </div>
                             </div>
                         </div>
 
@@ -189,7 +171,7 @@ const AboutPage = () => {
                                 <div className="relative rounded-[2rem] overflow-hidden shadow-2xl shadow-orange-500/20 border-4 border-white bg-white">
                                     <img
                                         src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80"
-                                        alt="Tech professionals in Nepal working with gadgets"
+                                        alt="Tech professionals working with gadgets"
                                         className="w-full h-[320px] md:h-[420px] lg:h-[480px] object-cover"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-[#3D1A00]/40 via-transparent to-transparent"></div>
@@ -210,9 +192,59 @@ const AboutPage = () => {
                 </div>
             </section>
 
-            {/* Mission & Vision */}
+            {/* ═══════════ STATS — MINIMAL (navbar-aligned) ═══════════ */}
+            <section id="stats-section" className="relative py-12 md:py-16 bg-[#3D1A00] overflow-hidden">
+                <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-16 relative">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10">
+
+                        <div className="text-center md:text-left md:border-r border-white/10 md:pr-8 last:border-r-0">
+                            <div className="text-3xl md:text-5xl font-bold text-white mb-1 tabular-nums">
+                                {counters.customers.toLocaleString()}+
+                            </div>
+                            <div className="text-xs md:text-sm font-semibold text-orange-400 uppercase tracking-widest">
+                                Happy Customers
+                            </div>
+                            <div className="text-[11px] text-white/50 mt-0.5 hidden md:block">Across Nepal</div>
+                        </div>
+
+                        <div className="text-center md:text-left md:border-r border-white/10 md:pr-8 last:border-r-0">
+                            <div className="text-3xl md:text-5xl font-bold text-white mb-1 tabular-nums">
+                                {counters.products}+
+                            </div>
+                            <div className="text-xs md:text-sm font-semibold text-orange-400 uppercase tracking-widest">
+                                Products
+                            </div>
+                            <div className="text-[11px] text-white/50 mt-0.5 hidden md:block">In our catalog</div>
+                        </div>
+
+                        <div className="text-center md:text-left md:border-r border-white/10 md:pr-8 last:border-r-0">
+                            <div className="text-3xl md:text-5xl font-bold text-white mb-1 tabular-nums">
+                                {counters.orders.toLocaleString()}+
+                            </div>
+                            <div className="text-xs md:text-sm font-semibold text-orange-400 uppercase tracking-widest">
+                                Orders Completed
+                            </div>
+                            <div className="text-[11px] text-white/50 mt-0.5 hidden md:block">And counting</div>
+                        </div>
+
+                        <div className="text-center md:text-left last:border-r-0">
+                            <div className="text-3xl md:text-5xl font-bold text-white mb-1 tabular-nums flex items-center justify-center md:justify-start gap-1">
+                                {counters.rating}
+                                <Star className="w-6 h-6 md:w-8 md:h-8 fill-orange-400 text-orange-400" />
+                            </div>
+                            <div className="text-xs md:text-sm font-semibold text-orange-400 uppercase tracking-widest">
+                                Customer Rating
+                            </div>
+                            <div className="text-[11px] text-white/50 mt-0.5 hidden md:block">Out of 5 stars</div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════ MISSION & VISION ═══════════ */}
             <section className="py-16 md:py-24 bg-cream">
-                <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 xl:px-16">
+                <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-16">
                     <div className="text-center mb-12">
                         <p className="eyebrow mb-3">Our Purpose</p>
                         <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#3D1A00] mb-4">
@@ -249,9 +281,9 @@ const AboutPage = () => {
                 </div>
             </section>
 
-            {/* What We Offer */}
+            {/* ═══════════ WHAT WE OFFER ═══════════ */}
             <section className="py-16 md:py-24 bg-[#FFF4E6]">
-                <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 xl:px-16">
+                <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-16">
                     <div className="text-center mb-12">
                         <p className="eyebrow mb-3">Our Offerings</p>
                         <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#3D1A00] mb-4">
@@ -282,9 +314,9 @@ const AboutPage = () => {
                 </div>
             </section>
 
-            {/* Why Choose Us */}
+            {/* ═══════════ WHY CHOOSE US ═══════════ */}
             <section className="py-16 md:py-24 bg-cream">
-                <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 xl:px-16">
+                <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-16">
                     <div className="text-center mb-12">
                         <p className="eyebrow mb-3">Why Choose Us</p>
                         <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#3D1A00] mb-4">
@@ -317,76 +349,74 @@ const AboutPage = () => {
                 </div>
             </section>
 
-            {/* Statistics */}
-            <section id="stats-section" className="py-16 md:py-20 bg-gradient-to-r from-orange-600 to-orange-500">
-                <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 xl:px-16">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        <div className="text-center">
-                            <div className="text-3xl md:text-5xl font-bold text-white mb-2">{counters.customers.toLocaleString()}+</div>
-                            <div className="text-white/85 text-sm font-medium">Happy Customers</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-3xl md:text-5xl font-bold text-white mb-2">{counters.products}+</div>
-                            <div className="text-white/85 text-sm font-medium">Products</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-3xl md:text-5xl font-bold text-white mb-2">{counters.orders.toLocaleString()}+</div>
-                            <div className="text-white/85 text-sm font-medium">Orders Completed</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-3xl md:text-5xl font-bold text-white mb-2 flex items-center justify-center gap-1">
-                                {counters.rating}
-                                <Star className="w-6 h-6 md:w-8 md:h-8 fill-yellow-300 text-yellow-300" />
-                            </div>
-                            <div className="text-white/85 text-sm font-medium">Customer Rating</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Team */}
+            {/* ═══════════ MEET THE FOUNDER ═══════════ */}
             <section className="py-16 md:py-24 bg-[#FFF4E6]">
-                <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 xl:px-16">
+                <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-16">
                     <div className="text-center mb-12">
-                        <p className="eyebrow mb-3">Our Team</p>
+                        <p className="eyebrow mb-3">Our Founder</p>
                         <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#3D1A00] mb-4">
-                            Meet the experts
+                            Meet the founder
                         </h2>
                         <p className="text-[#7A6A5A] max-w-2xl mx-auto">
-                            Passionate individuals dedicated to serving you better
+                            The vision and passion driving MeroGadget forward
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-                        {teamMembers.map((member, index) => (
-                            <div key={index} className="bg-white rounded-3xl p-8 text-center border border-orange-100 hover:border-orange-300 hover:shadow-hover transition-all duration-300 hover:-translate-y-1">
-                                <div className="w-24 h-24 mx-auto rounded-full overflow-hidden border-4 border-orange-100 shadow-lg shadow-orange-500/20 mb-5 bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-                                    {member.photo ? (
-                                        <img
-                                            src={member.photo}
-                                            alt={member.name}
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => {
-                                                e.target.style.display = 'none';
-                                                e.target.parentElement.innerHTML = `<span class="text-white text-2xl font-bold">${member.initial}</span>`;
-                                            }}
-                                        />
-                                    ) : (
-                                        <span className="text-white text-2xl font-bold">{member.initial}</span>
-                                    )}
+                    <div className="flex justify-center">
+                        <div className="w-full max-w-3xl">
+                            {teamMembers.map((member, index) => (
+                                <div
+                                    key={index}
+                                    className="bg-white rounded-3xl p-8 md:p-10 border border-orange-100 hover:border-orange-300 hover:shadow-hover transition-all duration-300"
+                                >
+                                    <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
+                                        <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-orange-100 shadow-lg shadow-orange-500/20 shrink-0 bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+                                            {member.photo ? (
+                                                <img
+                                                    src={member.photo}
+                                                    alt={member.name}
+                                                    className="w-full h-full object-cover"
+                                                    onError={(e) => {
+                                                        e.target.style.display = 'none';
+                                                        e.target.parentElement.innerHTML = `<span class="text-white text-4xl font-bold">${member.initial}</span>`;
+                                                    }}
+                                                />
+                                            ) : (
+                                                <span className="text-white text-4xl font-bold">{member.initial}</span>
+                                            )}
+                                        </div>
+
+                                        <div className="flex-1 text-center md:text-left">
+                                            <h3 className="text-2xl md:text-3xl font-bold text-[#3D1A00] mb-1">
+                                                {member.name}
+                                            </h3>
+                                            <p className="text-orange-600 text-sm md:text-base font-bold uppercase tracking-wider mb-4">
+                                                {member.role}
+                                            </p>
+                                            <p className="text-[#5C4B3A] leading-relaxed text-[15px] mb-6">
+                                                {member.bio}
+                                            </p>
+
+                                            {member.quote && (
+                                                <div className="relative bg-orange-50/70 border-l-4 border-orange-500 rounded-r-2xl p-5 pt-6">
+                                                    <Quote className="w-6 h-6 text-orange-400 absolute -top-2 left-3 bg-white rounded-full p-0.5" strokeWidth={2.5} />
+                                                    <p className="text-[#3D1A00] font-medium italic text-sm md:text-base leading-relaxed">
+                                                        {member.quote}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
-                                <h3 className="text-lg font-bold text-[#3D1A00] mb-1">{member.name}</h3>
-                                <p className="text-orange-600 text-sm font-semibold mb-3">{member.role}</p>
-                                <p className="text-[#7A6A5A] text-sm leading-relaxed">{member.bio}</p>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* Testimonials */}
+            {/* ═══════════ TESTIMONIALS ═══════════ */}
             <section className="py-16 md:py-24 bg-cream">
-                <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 xl:px-16">
+                <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-16">
                     <div className="text-center mb-12">
                         <p className="eyebrow mb-3">Testimonials</p>
                         <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#3D1A00] mb-4">
@@ -464,9 +494,9 @@ const AboutPage = () => {
                 </div>
             </section>
 
-            {/* Our Commitment */}
+            {/* ═══════════ OUR COMMITMENT ═══════════ */}
             <section className="py-16 md:py-20 bg-gradient-to-br from-[#FFF4E6] via-cream to-[#FFE8D6]">
-                <div className="container mx-auto max-w-4xl text-center px-4 sm:px-6 lg:px-10 xl:px-16">
+                <div className="w-full max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-10 xl:px-16">
                     <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mb-6 shadow-lg shadow-orange-500/30">
                         <Heart className="w-8 h-8 text-white fill-white" strokeWidth={2} />
                     </div>
@@ -482,9 +512,9 @@ const AboutPage = () => {
                 </div>
             </section>
 
-            {/* Final CTA */}
+            {/* ═══════════ FINAL CTA ═══════════ */}
             <section className="py-16 md:py-24 bg-[#3D1A00]">
-                <div className="container mx-auto max-w-4xl text-center px-4 sm:px-6 lg:px-10 xl:px-16">
+                <div className="w-full max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-10 xl:px-16">
                     <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
                         Ready to upgrade your tech?
                     </h2>

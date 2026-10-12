@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
+import { ArrowLeft, Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -36,71 +37,105 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cream flex items-center justify-center px-4 sm:px-6 lg:px-10 xl:px-16 py-12">
+    <div className="min-h-screen bg-cream flex items-center justify-center px-4 sm:px-6 lg:px-10 xl:px-16 py-8 sm:py-12">
       <div className="w-full max-w-5xl bg-white rounded-3xl shadow-xl overflow-hidden border border-orange-100 grid md:grid-cols-2">
 
-        {/* LEFT — Dark brown panel */}
-        <div className="hidden md:flex flex-col justify-between bg-[#3D1A00] text-cream p-10">
-          <div>
-            <Link to="/" className="flex items-center gap-3 mb-16">
-              <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30 overflow-hidden">
-                <img
-                  src="/Logo.png"
-                  alt="MeroGadget icon"
-                  className="w-full h-full object-contain"
-                />
+        {/* ─── LEFT — Brand panel ─── */}
+        <div className="hidden md:flex flex-col justify-between bg-gradient-to-br from-[#3D1A00] to-[#2B0F00] text-cream p-10 relative overflow-hidden">
+
+          {/* Decorative blobs */}
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-orange-500/20 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-orange-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div className="relative z-10">
+            <Link to="/" className="flex items-center gap-3 mb-12">
+              <div className="w-11 h-11 rounded-full bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30 overflow-hidden">
+                <img src="/Logo.png" alt="MeroGadget" className="w-full h-full object-contain" />
               </div>
-              <span className="text-xl font-bold text-white tracking-tight">
+              <span className="text-lg font-bold text-white tracking-tight">
                 Mero<span className="text-orange-400">Gadget</span>
               </span>
             </Link>
 
-            <h1 className="text-4xl lg:text-5xl font-bold text-white leading-tight mb-6">
-              Welcome back to<br />your gadgets.
+            <h1 className="text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+              Welcome back<br />to your gadgets.
             </h1>
+
+            <p className="text-[#D4C4B0] text-sm leading-relaxed max-w-xs">
+              Sign in to reorder favorites, track deliveries, and discover something new.
+            </p>
           </div>
 
-          <p className="text-[#D4C4B0] text-sm leading-relaxed">
-            Sign in to reorder favorites, track deliveries, and discover something new.
-          </p>
+          {/* Bottom features list */}
+          <div className="relative z-10 space-y-3 pt-8 border-t border-white/10">
+            {[
+              'Track every order in real time',
+              'Save your favorite products',
+              'Exclusive member-only deals'
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2.5 text-[#D4C4B0] text-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0"></span>
+                {item}
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* RIGHT — Form */}
-        <div className="p-8 md:p-12">
+        {/* ─── RIGHT — Form ─── */}
+        <div className="p-8 md:p-12 flex flex-col justify-center">
+
           <Link
             to="/"
-            className="text-orange-600 text-sm font-semibold hover:text-orange-700 mb-8 inline-block"
+            className="inline-flex items-center gap-1.5 text-[#7A6A5A] hover:text-orange-600 text-sm font-semibold mb-8 self-start transition-colors"
           >
-            ← Back to home
+            <ArrowLeft className="w-4 h-4" />
+            Back to home
           </Link>
 
-          <p className="eyebrow mb-2">Good to see you</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-[#3D1A00] mb-3">Sign in</h2>
-          <p className="text-[#7A6A5A] mb-8">Continue your MeroGadget journey.</p>
+          <div className="mb-8">
+            <p className="eyebrow mb-2">Good to see you</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#3D1A00] mb-2">Sign in</h2>
+            <p className="text-[#7A6A5A] text-sm">Continue your MeroGadget journey.</p>
+          </div>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
+
+            {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-[#3D1A00] mb-2">
+              <label htmlFor="email" className="block text-xs font-bold text-[#A8998A] uppercase tracking-widest mb-2">
                 Email address
               </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-cream border border-orange-100 rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
-                placeholder="you@example.com"
-              />
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A8998A] pointer-events-none" />
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 bg-cream border border-orange-100 rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
+                  placeholder="you@example.com"
+                />
+              </div>
             </div>
 
+            {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-[#3D1A00] mb-2">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label htmlFor="password" className="block text-xs font-bold text-[#A8998A] uppercase tracking-widest">
+                  Password
+                </label>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs font-semibold text-orange-600 hover:text-orange-700"
+                >
+                  Forgot?
+                </Link>
+              </div>
               <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A8998A] pointer-events-none" />
                 <input
                   id="password"
                   name="password"
@@ -109,42 +144,34 @@ const LoginPage = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-cream border border-orange-100 rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
+                  className="w-full pl-11 pr-11 py-3 bg-cream border border-orange-100 rounded-2xl text-[#3D1A00] placeholder-[#A8998A] focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all"
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#A8998A] hover:text-orange-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full text-[#A8998A] hover:text-orange-600 hover:bg-orange-50 transition-colors"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? '🙈' : '👁'}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            <div className="flex items-center justify-end">
-              <Link
-                to="/forgot-password"
-                className="text-sm font-semibold text-orange-600 hover:text-orange-700"
-              >
-                Forgot password?
-              </Link>
-            </div>
-
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-orange-600 text-white py-3.5 rounded-2xl font-bold text-base hover:bg-orange-700 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-orange-500/20"
+              className="w-full bg-orange-600 text-white py-3.5 rounded-2xl font-bold text-base hover:bg-orange-700 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-orange-500/20 active:scale-[0.98] flex items-center justify-center gap-2"
             >
               {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
                   Signing in...
-                </span>
-              ) : 'Sign in'}
+                </>
+              ) : (
+                'Sign in'
+              )}
             </button>
           </form>
 

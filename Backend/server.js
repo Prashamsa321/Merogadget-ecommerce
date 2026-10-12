@@ -1,8 +1,10 @@
+
 import dotenv from 'dotenv'
 import express from 'express'
 import mongoose from 'mongoose'
 import cors from 'cors'
 import cookieParser from "cookie-parser";
+import dns from "node:dns";
 
 
 import authRoutes from './routes/auth.routes.js'
@@ -16,6 +18,8 @@ import orderRoutes from './routes/order.routes.js';
 import paymentRoutes from './routes/paymentRoute.js';
 import subscriberRoutes from './routes/subscriber.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
+import brandRoutes from './routes/brand.routes.js';
+import uploadRoutes from './routes/upload.routes.js';
 
 const app = express()
 
@@ -28,6 +32,7 @@ dotenv.config()
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 // CORS configuration
 const allowedOrigins = [
   'http://localhost:5173',
@@ -148,6 +153,8 @@ app.use('/api/orders', orderRoutes)
 app.use('/api/payment', paymentRoutes)
 app.use('/api/subscribers', subscriberRoutes)
 app.use('/api/dashboard', dashboardRoutes)
+app.use('/api/upload', uploadRoutes)
+app.use('/api/brands', brandRoutes)
 
 // Error handling middleware
 app.use((err, req, res, next) => {

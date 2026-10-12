@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { X, Truck, Flame, Headphones, Sparkles, Star, Gift } from 'lucide-react';
 
 const TopAnnouncementBar = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -15,16 +14,6 @@ const TopAnnouncementBar = () => {
     { id: 6, message: "Exclusive Offers for Members", icon: Gift }
   ];
 
-  useEffect(() => {
-    let interval;
-    if (!isPaused && isVisible) {
-      interval = setInterval(() => {
-        setCurrentIndex((prev) => (prev + 1) % announcements.length);
-      }, 4000);
-    }
-    return () => clearInterval(interval);
-  }, [isPaused, isVisible, announcements.length]);
-
   const handleClose = () => setIsVisible(false);
 
   if (!isVisible) return null;
@@ -35,24 +24,24 @@ const TopAnnouncementBar = () => {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-1.5">
-        <div className="relative overflow-hidden">
+      <div className="w-full py-2">
+        <div className="relative overflow-hidden w-full">
           <div
-            className="flex items-center justify-center gap-6"
+            className="flex items-center gap-6 w-max"
             style={{
-              animation: isPaused ? 'none' : 'marquee 25s linear infinite',
-              whiteSpace: 'nowrap'
+              animation: isPaused ? 'marquee-rtl 35s linear infinite paused' : 'marquee-rtl 35s linear infinite',
+              animationPlayState: isPaused ? 'paused' : 'running'
             }}
           >
-            {[...announcements, ...announcements].map((item, idx) => {
+            {[...announcements, ...announcements, ...announcements].map((item, idx) => {
               const Icon = item.icon;
               return (
                 <div
                   key={`${item.id}-${idx}`}
-                  className="inline-flex items-center gap-1.5 px-3"
+                  className="inline-flex items-center gap-2 px-3 shrink-0"
                 >
                   <Icon className="w-3.5 h-3.5 text-orange-400 shrink-0" strokeWidth={2} />
-                  <span className="text-xs font-medium text-[#FDF6EC]">
+                  <span className="text-[11px] sm:text-xs font-medium text-[#FDF6EC] whitespace-nowrap">
                     {item.message}
                   </span>
                   <span className="text-orange-400 text-base mx-1.5">•</span>
@@ -62,22 +51,30 @@ const TopAnnouncementBar = () => {
           </div>
         </div>
 
-        <div className="absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[#3D1A00] to-transparent pointer-events-none" />
-        <div className="absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[#3D1A00] to-transparent pointer-events-none" />
+        {/* Left fade */}
+        <div className="absolute inset-y-0 left-0 w-8 sm:w-12 bg-gradient-to-r from-[#3D1A00] via-[#3D1A00]/80 to-transparent pointer-events-none z-10" />
+
+        {/* Right fade */}
+        <div className="absolute inset-y-0 right-0 w-8 sm:w-12 bg-gradient-to-l from-[#3D1A00] via-[#3D1A00]/80 to-transparent pointer-events-none z-10" />
       </div>
 
+      {/* Close button */}
       <button
         onClick={handleClose}
-        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-white/10 transition-all duration-200 z-10 opacity-0 group-hover:opacity-100"
+        className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-white/10 transition-all duration-200 z-20 opacity-60 hover:opacity-100"
         aria-label="Close announcement"
       >
-        <X className="w-3.5 h-3.5 text-[#FDF6EC]/70 hover:text-white" />
+        <X className="w-3.5 h-3.5 text-[#FDF6EC]/80 hover:text-white" />
       </button>
 
       <style>{`
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+        @keyframes marquee-rtl {
+          0% {
+            transform: translateX(-33.333%);
+          }
+          100% {
+            transform: translateX(0%);
+          }
         }
       `}</style>
     </div>

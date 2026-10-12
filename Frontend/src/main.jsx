@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { ProductProvider } from './context/ProductContext'
 import { CartProvider } from './context/CartContext'
 import { ToastProvider } from './context/ToastContext'
 import App from './App'
@@ -16,11 +17,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       }}
     >
       <AuthProvider>
-        <CartProvider>
-          <ToastProvider>
-            <App />
-          </ToastProvider>
-        </CartProvider>
+        <ProductProvider>
+          <CartProvider>
+            <ToastProvider>
+              <App />
+            </ToastProvider>
+          </CartProvider>
+        </ProductProvider>
       </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>

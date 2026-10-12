@@ -25,7 +25,8 @@ const Footer = () => {
 
   return (
     <footer className="bg-[#2B0F00] text-[#FDF6EC]">
-      <div className="container mx-auto max-w-7xl pt-14 pb-8 px-4 sm:px-6 lg:px-10 xl:px-16">
+      {/* ✅ Full-width wrapper — matches Navbar padding (w-full + same px classes) */}
+      <div className="w-full pt-14 pb-8 px-4 sm:px-6 lg:px-10 xl:px-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-10">
 
           {/* Brand */}

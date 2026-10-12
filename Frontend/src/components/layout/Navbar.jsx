@@ -383,7 +383,7 @@ const Navbar = () => {
                 backdropFilter: 'blur(40px)'
               }}
             >
-              {[{ to: '/', label: 'Home', icon: '🏠' }, { to: '/products', label: 'Products', icon: '📦' }, { to: '/about', label: 'About Us', icon: '💡' }, { to: '/contact', label: 'Contact', icon: '✉️' }].map(({ to, label, icon }) => {
+              {[{ to: '/', label: 'Home', icon: '' }, { to: '/products', label: 'Products', icon: '' }, { to: '/about', label: 'About Us', icon: '' }, { to: '/contact', label: 'Contact', icon: '' }].map(({ to, label, icon }) => {
                 const isActive = to === '/' ? location.pathname === '/' : location.pathname.startsWith(to)
                 return (
                   <Link

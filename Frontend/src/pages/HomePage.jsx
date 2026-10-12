@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { productService } from '../services/productService'
+import { useProducts } from '../context/ProductContext'
 import { subscriberService } from '../services/subscriberService'
 import { useToast } from '../context/ToastContext'
 import ProductCard from '../components/products/ProductCard'
@@ -36,11 +36,14 @@ const CATEGORY_IMAGES = {
 
 const DEFAULT_CATEGORY_IMAGE = 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80';
 
+const FEATURED_BRANDS = ['Apple', 'Sony', 'Samsung'];
+
 const HomePage = () => {
+  const { products, loading } = useProducts()
   const [featuredProducts, setFeaturedProducts] = useState([])
   const [latestProducts, setLatestProducts] = useState([])
   const [topCategories, setTopCategories] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [brandProducts, setBrandProducts] = useState({})
 
   const { success, error } = useToast()
   const [email, setEmail] = useState('')
@@ -48,41 +51,43 @@ const HomePage = () => {
   const [subscribed, setSubscribed] = useState(false)
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const products = await productService.getAllProducts()
-        const productsArray = Array.isArray(products) ? products : []
-        setFeaturedProducts(productsArray.slice(0, 4))
+    if (!products || products.length === 0) return
 
-        const latest = [...productsArray].reverse().slice(0, 4);
-        setLatestProducts(latest);
+    const productsArray = Array.isArray(products) ? products : []
 
-        const categoryMap = new Map()
-        productsArray.forEach((p) => {
-          if (p.category && !categoryMap.has(p.category)) {
-            categoryMap.set(p.category, {
-              name: p.category,
-              image: p.images?.[0] || CATEGORY_IMAGES[p.category] || DEFAULT_CATEGORY_IMAGE,
-            })
-          }
+    setFeaturedProducts(productsArray.slice(0, 5))
+
+    const latest = [...productsArray].reverse().slice(0, 5)
+    setLatestProducts(latest)
+
+    const categoryMap = new Map()
+    productsArray.forEach((p) => {
+      if (p.category && !categoryMap.has(p.category)) {
+        categoryMap.set(p.category, {
+          name: p.category,
+          image: p.images?.[0] || CATEGORY_IMAGES[p.category] || DEFAULT_CATEGORY_IMAGE,
         })
-
-        const cats = Array.from(categoryMap.values())
-          .map(cat => ({
-            ...cat,
-            image: CATEGORY_IMAGES[cat.name] || cat.image,
-          }))
-          .slice(0, 8)
-
-        setTopCategories(cats)
-      } catch (error) {
-        console.error('Failed to fetch products:', error)
-      } finally {
-        setLoading(false)
       }
-    }
-    fetchData()
-  }, [])
+    })
+
+    const cats = Array.from(categoryMap.values())
+      .map(cat => ({
+        ...cat,
+        image: CATEGORY_IMAGES[cat.name] || cat.image,
+      }))
+      .slice(0, 10)
+
+    setTopCategories(cats)
+
+    // Build per-brand product lists (5 per brand)
+    const brandMap = {}
+    FEATURED_BRANDS.forEach(brand => {
+      brandMap[brand] = productsArray
+        .filter(p => p.brand && p.brand.toLowerCase() === brand.toLowerCase())
+        .slice(0, 5)
+    })
+    setBrandProducts(brandMap)
+  }, [products])
 
   const handleSubscribe = async (e) => {
     e.preventDefault()
@@ -120,7 +125,7 @@ const HomePage = () => {
   return (
     <div className="bg-[#FFFAF3]">
       {/* ═══════════ HERO ═══════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-orange-50 via-orange-50/40 to-[#FFFAF3]">
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#FFF4E6] via-[#FFEFDD] to-[#FFFAF3] min-h-[calc(100vh-180px)] flex items-center">
         <div
           className="absolute inset-0 opacity-[0.04]"
           style={{
@@ -133,10 +138,10 @@ const HomePage = () => {
         <div className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-orange-200 rounded-full filter blur-[180px] opacity-30"></div>
         <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-amber-100 rounded-full filter blur-[180px] opacity-50"></div>
 
-        <div className="container mx-auto pt-8 pb-12 lg:pt-10 lg:pb-16 relative z-10 max-w-7xl px-4 sm:px-6 lg:px-10 xl:px-16">
-          <div className="grid md:grid-cols-2 gap-10 lg:gap-14 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-orange-200 rounded-full text-[#1F1A16] text-sm mb-5 shadow-sm">
+        <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-16 py-8 lg:py-10 relative z-10">
+          <div className="grid md:grid-cols-2 gap-10 lg:gap-14 items-stretch">
+            <div className="flex flex-col justify-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-orange-200 rounded-full text-[#1F1A16] text-sm mb-4 shadow-sm self-start">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
@@ -152,11 +157,26 @@ const HomePage = () => {
                 </span>
               </h1>
 
-              <p className="text-lg text-[#6B6258] mb-7 max-w-lg leading-relaxed">
+              <p className="text-lg text-[#6B6258] mb-4 max-w-lg leading-relaxed">
                 Cutting-edge gadgets and electronics. Experience the future of technology with our premium collection — delivered to your door.
               </p>
 
-              <div className="flex flex-wrap gap-4 mb-8">
+              <ul className="space-y-2 mb-6 max-w-lg">
+                {[
+                  "Curated gadgets from the world's top brands",
+                  'Genuine warranty & fast nationwide delivery',
+                  'Exclusive member prices & seasonal deals'
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-[#6B6258] text-sm">
+                    <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-orange-100 flex items-center justify-center">
+                      <Check className="w-3 h-3 text-orange-600 stroke-[3]" />
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex flex-wrap gap-4 mb-6">
                 <Link
                   to="/products"
                   className="bg-orange-600 text-white px-8 py-4 rounded-full font-semibold hover:bg-orange-700 hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 active:scale-95 inline-flex items-center gap-2 group"
@@ -171,11 +191,28 @@ const HomePage = () => {
                   How it works
                 </Link>
               </div>
+
+              <div className="flex flex-wrap items-center gap-x-8 gap-y-3 pt-5 border-t border-orange-200/60 max-w-lg">
+                <div>
+                  <p className="text-2xl font-bold text-[#1F1A16]">10K+</p>
+                  <p className="text-xs text-[#6B6258] uppercase tracking-wider">Happy Buyers</p>
+                </div>
+                <div className="w-px h-8 bg-orange-200/60 hidden sm:block"></div>
+                <div>
+                  <p className="text-2xl font-bold text-[#1F1A16]">4.9★</p>
+                  <p className="text-xs text-[#6B6258] uppercase tracking-wider">Avg Rating</p>
+                </div>
+                <div className="w-px h-8 bg-orange-200/60 hidden sm:block"></div>
+                <div>
+                  <p className="text-2xl font-bold text-[#1F1A16]">500+</p>
+                  <p className="text-xs text-[#6B6258] uppercase tracking-wider">Products</p>
+                </div>
+              </div>
             </div>
 
-            <div className="relative hidden md:block">
+            <div className="relative hidden md:flex items-center">
               <div className="absolute -inset-4 bg-gradient-to-tr from-orange-100 via-white to-amber-100 rounded-[2.5rem] -rotate-2"></div>
-              <div className="relative bg-white rounded-[2rem] p-4 shadow-[0_20px_60px_-15px_rgba(255,98,0,0.15)] border border-orange-100">
+              <div className="relative bg-white rounded-[2rem] p-4 shadow-[0_20px_60px_-15px_rgba(255,98,0,0.15)] border border-orange-100 w-full">
                 <img
                   src="./home appliance.png"
                   alt="Premium electronics collection"
@@ -198,8 +235,8 @@ const HomePage = () => {
       </section>
 
       {/* ═══════════ FEATURED PRODUCTS ═══════════ */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 xl:px-16">
+      <section className="py-12 bg-white">
+        <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-16">
           <div className="text-center mb-12">
             <p className="text-xs font-semibold text-orange-600 uppercase tracking-widest mb-2">Featured</p>
             <h2 className="text-3xl md:text-4xl font-bold text-[#1F1A16] mb-3">Trending right now</h2>
@@ -207,8 +244,8 @@ const HomePage = () => {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+              {[...Array(5)].map((_, i) => (
                 <div key={i} className="bg-white rounded-2xl p-4 animate-pulse border border-orange-100">
                   <div className="h-48 bg-orange-50 rounded-xl mb-4"></div>
                   <div className="h-4 bg-orange-100 rounded-full mb-2 w-3/4"></div>
@@ -217,7 +254,7 @@ const HomePage = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
               {featuredProducts.map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}
@@ -240,7 +277,7 @@ const HomePage = () => {
 
       {/* ═══════════ SHOP BY CATEGORY ═══════════ */}
       <section className="py-16 bg-[#FFF4E6]">
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 xl:px-16">
+        <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-16">
           <div className="text-center mb-12">
             <p className="text-xs font-semibold text-orange-600 uppercase tracking-widest mb-2">Shop by category</p>
             <h2 className="text-3xl md:text-4xl font-bold text-[#1F1A16] mb-3">Find your next favorite thing</h2>
@@ -248,8 +285,8 @@ const HomePage = () => {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-              {[...Array(4)].map((_, i) => (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
+              {[...Array(5)].map((_, i) => (
                 <div key={i} className="bg-white rounded-2xl overflow-hidden border border-orange-100 animate-pulse">
                   <div className="h-44 bg-orange-50"></div>
                   <div className="p-5 space-y-2">
@@ -260,14 +297,14 @@ const HomePage = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
               {topCategories.map((category, index) => (
                 <Link
                   key={index}
                   to={`/products?category=${encodeURIComponent(category.name)}`}
                   className="group bg-white rounded-2xl overflow-hidden border border-orange-100 hover:border-orange-500 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
                 >
-                  <div className="relative h-44 sm:h-48 bg-gradient-to-br from-orange-50 to-amber-50 overflow-hidden">
+                  <div className="relative h-40 sm:h-44 bg-gradient-to-br from-orange-50 to-amber-50 overflow-hidden">
                     <img
                       src={category.image}
                       alt={category.name}
@@ -277,12 +314,12 @@ const HomePage = () => {
                       }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                    <h3 className="absolute bottom-3 left-4 right-4 text-white font-bold text-lg leading-tight drop-shadow-lg">
+                    <h3 className="absolute bottom-3 left-4 right-4 text-white font-bold text-base leading-tight drop-shadow-lg">
                       {category.name}
                     </h3>
                   </div>
 
-                  <div className="p-5 flex flex-col flex-grow">
+                  <div className="p-4 flex flex-col flex-grow">
                     <span className="text-orange-600 text-sm font-semibold inline-flex items-center gap-1 group-hover:gap-2 transition-all mt-auto">
                       Shop Now
                       <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
@@ -295,9 +332,66 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* ═══════════ SHOP BY BRAND ═══════════ */}
+      {!loading && (
+        <section className="py-16 bg-white border-y border-orange-100/60">
+          <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-16">
+
+            {/* Centered section header */}
+            <div className="text-center mb-12">
+              <p className="text-xs font-semibold text-orange-600 uppercase tracking-widest mb-2">
+                Shop by brand
+              </p>
+              <h2 className="text-3xl md:text-4xl font-bold text-[#1F1A16] mb-3">
+                Top brands, trusted quality
+              </h2>
+              <p className="text-[#6B6258] max-w-xl mx-auto">
+                Explore curated products from the world's leading technology brands
+              </p>
+            </div>
+
+            {/* Brand sections stacked */}
+            <div className="space-y-12">
+              {FEATURED_BRANDS.map((brand) => {
+                const items = brandProducts[brand] || []
+                if (items.length === 0) return null
+
+                return (
+                  <div key={brand}>
+                    {/* Brand name + explore more */}
+                    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+                      <h3 className="text-xl md:text-2xl font-bold text-[#1F1A16] flex items-center gap-2">
+                        <span className="w-1 h-6 bg-orange-600 rounded-full"></span>
+                        {brand}
+                      </h3>
+
+                      <Link
+                        to={`/products?brand=${encodeURIComponent(brand)}`}
+                        className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 font-semibold text-sm group self-start sm:self-auto"
+                      >
+                        Explore more {brand}
+                        <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                      </Link>
+                    </div>
+
+                    {/* 5 products grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+                      {items.map((product) => (
+                        <ProductCard key={product._id} product={product} />
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+          </div>
+        </section>
+      )}
+
       {/* ═══════════ LATEST PRODUCTS ═══════════ */}
       <section className="py-16 bg-white">
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 xl:px-16">
+        <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-16">
           <div className="text-center mb-12">
             <p className="text-xs font-semibold text-orange-600 uppercase tracking-widest mb-2">New Arrivals</p>
             <h2 className="text-3xl md:text-4xl font-bold text-[#1F1A16] mb-3">Latest Products</h2>
@@ -305,8 +399,8 @@ const HomePage = () => {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+              {[...Array(5)].map((_, i) => (
                 <div key={i} className="bg-white rounded-2xl p-4 animate-pulse border border-orange-100">
                   <div className="h-48 bg-orange-50 rounded-xl mb-4"></div>
                   <div className="h-4 bg-orange-100 rounded-full mb-2 w-3/4"></div>
@@ -315,7 +409,7 @@ const HomePage = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
               {latestProducts.map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}

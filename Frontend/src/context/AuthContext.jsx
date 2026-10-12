@@ -17,9 +17,9 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  // Load user from localStorage directly
+  // Load user from localStorage + refresh from server
   useEffect(() => {
-    const loadUser = () => {
+    const loadUser = async () => {
       const storedToken = localStorage.getItem('token')
       const storedUser = localStorage.getItem('user')
 
@@ -30,6 +30,26 @@ export const AuthProvider = ({ children }) => {
           setIsAuthenticated(true)
           setToken(storedToken)
           api.defaults.headers.common['Authorization'] = 'Bearer ' + storedToken
+
+          // Fetch fresh user data from backend to ensure nothing is stale
+          try {
+            const res = await api.get('/auth/me')
+            if (res.data?.user) {
+              setUser(res.data.user)
+              localStorage.setItem('user', JSON.stringify(res.data.user))
+            }
+          } catch (err) {
+            console.warn('Failed to refresh user data:', err.message)
+            // If token expired, log out
+            if (err.response?.status === 401) {
+              localStorage.removeItem('token')
+              localStorage.removeItem('user')
+              setUser(null)
+              setIsAuthenticated(false)
+              setToken(null)
+              delete api.defaults.headers.common['Authorization']
+            }
+          }
         } catch (error) {
           console.error('Error parsing user data:', error)
           localStorage.removeItem('token')

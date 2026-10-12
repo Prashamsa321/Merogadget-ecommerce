@@ -24,6 +24,7 @@ import AdminProducts from './pages/admin/AdminProducts';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminUsers from './pages/admin/AdminUsers';
 import CategoriesPage from './pages/admin/CategoriesPage';
+import BrandsPage from './pages/admin/BrandsPage';
 import CreateProductPage from './pages/admin/CreateProductPage';
 import AdminProfile from './pages/admin/AdminProfile';
 import AdminSettings from './pages/admin/AdminSettings';
@@ -32,7 +33,6 @@ import AdminAnalytics from './pages/admin/AdminAnalytics';
 import Footer from './components/layout/Footer';
 import OrdersPage from './pages/OrdersPage';
 
-// ✅ Scrolls to top of page on every route change
 function ScrollToTop() {
   const { pathname } = useLocation();
 
@@ -56,7 +56,6 @@ function App() {
 
   return (
     <div>
-      {/* ✅ Scrolls to top on every page navigation */}
       <ScrollToTop />
 
       {/* Only show Navbar if NOT on admin routes */}
@@ -102,6 +101,7 @@ function App() {
           <Route path="orders" element={<AdminOrders />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="categories" element={<CategoriesPage />} />
+          <Route path="brands" element={<BrandsPage />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="contacts" element={<AdminContacts />} />
           <Route path="settings" element={<AdminSettings />} />

@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { contactService } from '../services/contactService';
 import { useToast } from '../context/ToastContext';
+import {
+  Mail, Phone, MapPin, Clock, Send, AlertCircle, Loader2, MessageSquare
+} from 'lucide-react';
 
 function ContactPage() {
   const { success, error: toastError } = useToast();
@@ -75,54 +78,80 @@ function ContactPage() {
   };
 
   const getInputClassName = (fieldName) => {
-    const baseClasses = "w-full px-4 py-3 rounded-2xl text-base outline-none transition-all duration-300 border bg-cream text-[#3D1A00] placeholder-[#A8998A]";
+    const baseClasses = "w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all duration-300 border bg-cream text-[#3D1A00] placeholder-[#A8998A]";
 
     if (errors[fieldName]) {
       return `${baseClasses} border-red-400 focus:border-red-400 focus:ring-2 focus:ring-red-400/20`;
     }
 
     if (focusedField === fieldName) {
-      return `${baseClasses} border-orange-400 ring-2 ring-orange-400/30 focus:border-orange-400`;
+      return `${baseClasses} border-orange-400 ring-2 ring-orange-400/30`;
     }
 
     return `${baseClasses} border-orange-100 hover:border-orange-300 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20`;
   };
 
-  return (
-    <div className="min-h-screen bg-cream py-12 px-4 sm:px-6 lg:px-10 xl:px-16">
-      <div className="container mx-auto max-w-6xl">
+  const contactInfo = [
+    {
+      icon: Mail,
+      label: 'Email us',
+      value: 'prashamsalamsal2061@gmail.com',
+      href: 'mailto:prashamsalamsal2061@gmail.com'
+    },
+    {
+      icon: Phone,
+      label: 'Call us',
+      value: '+977 9846611018',
+      href: 'tel:+9779846611018'
+    },
+    {
+      icon: MapPin,
+      label: 'Visit us',
+      value: 'Hall Chowk, Kawasoti-7, Nawalpur, Nepal',
+      href: null
+    }
+  ];
 
-        {/* Header */}
-        <div className="text-center mb-12">
+  return (
+    <div className="min-h-screen bg-cream py-10 md:py-14 px-4 sm:px-6 lg:px-10 xl:px-16">
+      <div className="w-full max-w-6xl mx-auto">
+
+        {/* ═══ Header ═══ */}
+        <div className="text-center mb-10 md:mb-14">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-orange-100 rounded-full mb-5 shadow-soft">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
             </span>
-            <span className="text-sm text-[#3D1A00] font-semibold uppercase tracking-widest">Contact Us</span>
+            <span className="text-xs text-[#3D1A00] font-bold uppercase tracking-widest">Contact Us</span>
           </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#3D1A00] mb-4">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#3D1A00] mb-4 leading-tight">
             Get in <span className="text-orange-600">touch</span>
           </h1>
-          <p className="text-[#7A6A5A] text-base md:text-lg max-w-2xl mx-auto">
+          <p className="text-[#7A6A5A] text-sm md:text-base max-w-2xl mx-auto">
             Have questions? We'd love to hear from you. Our team is here to help.
           </p>
         </div>
 
-        {/* ─── Two-column row: Form (left) + Info/Hours (right) ─── */}
-        <div className="grid lg:grid-cols-2 gap-8">
+        {/* ═══ Two-column ═══ */}
+        <div className="grid lg:grid-cols-5 gap-6">
 
-          {/* Contact Form */}
-          <div className="bg-white rounded-3xl p-6 md:p-8 border border-orange-100 shadow-soft">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-[#3D1A00] mb-2">Send us a message</h2>
-              <p className="text-[#7A6A5A] text-sm">Fill out the form below and we'll get back to you soon.</p>
+          {/* ═══ Contact Form (3/5 width) ═══ */}
+          <div className="lg:col-span-3 bg-white rounded-3xl p-6 md:p-8 border border-orange-100 shadow-soft">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-11 h-11 rounded-2xl bg-orange-50 flex items-center justify-center shrink-0">
+                <MessageSquare className="w-5 h-5 text-orange-600" strokeWidth={2.2} />
+              </div>
+              <div>
+                <h2 className="text-lg md:text-xl font-bold text-[#3D1A00]">Send us a message</h2>
+                <p className="text-[#7A6A5A] text-xs">Fill out the form and we'll get back to you</p>
+              </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[#3D1A00] text-sm font-semibold mb-2">
+                  <label className="block text-xs font-bold text-[#A8998A] uppercase tracking-widest mb-2">
                     Full name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -137,13 +166,14 @@ function ContactPage() {
                   />
                   {errors.name && (
                     <p className="mt-1.5 text-red-500 text-xs flex items-center gap-1">
-                      <span>⚠️</span> {errors.name}
+                      <AlertCircle className="w-3 h-3 shrink-0" strokeWidth={2.5} />
+                      {errors.name}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-[#3D1A00] text-sm font-semibold mb-2">
+                  <label className="block text-xs font-bold text-[#A8998A] uppercase tracking-widest mb-2">
                     Email address <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -158,14 +188,15 @@ function ContactPage() {
                   />
                   {errors.email && (
                     <p className="mt-1.5 text-red-500 text-xs flex items-center gap-1">
-                      <span>⚠️</span> {errors.email}
+                      <AlertCircle className="w-3 h-3 shrink-0" strokeWidth={2.5} />
+                      {errors.email}
                     </p>
                   )}
                 </div>
               </div>
 
               <div>
-                <label className="block text-[#3D1A00] text-sm font-semibold mb-2">
+                <label className="block text-xs font-bold text-[#A8998A] uppercase tracking-widest mb-2">
                   Subject <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -180,13 +211,14 @@ function ContactPage() {
                 />
                 {errors.subject && (
                   <p className="mt-1.5 text-red-500 text-xs flex items-center gap-1">
-                    <span>⚠️</span> {errors.subject}
+                    <AlertCircle className="w-3 h-3 shrink-0" strokeWidth={2.5} />
+                    {errors.subject}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-[#3D1A00] text-sm font-semibold mb-2">
+                <label className="block text-xs font-bold text-[#A8998A] uppercase tracking-widest mb-2">
                   Message <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -201,7 +233,8 @@ function ContactPage() {
                 />
                 {errors.message && (
                   <p className="mt-1.5 text-red-500 text-xs flex items-center gap-1">
-                    <span>⚠️</span> {errors.message}
+                    <AlertCircle className="w-3 h-3 shrink-0" strokeWidth={2.5} />
+                    {errors.message}
                   </p>
                 )}
               </div>
@@ -209,21 +242,16 @@ function ContactPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-orange-300 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-full transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20"
+                className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-orange-300 disabled:cursor-not-allowed text-white font-bold py-3.5 px-6 rounded-full transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20"
               >
                 {isSubmitting ? (
                   <>
-                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                    <Loader2 className="w-5 h-5 animate-spin" strokeWidth={2.5} />
                     Sending...
                   </>
                 ) : (
                   <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
+                    <Send className="w-4 h-4" strokeWidth={2.2} />
                     Send Message
                   </>
                 )}
@@ -231,62 +259,52 @@ function ContactPage() {
             </form>
           </div>
 
-          {/* Right column: Info + Business Hours */}
-          <div className="space-y-6">
+          {/* ═══ Right Column: Info + Hours (2/5 width) ═══ */}
+          <div className="lg:col-span-2 space-y-6">
 
             {/* Contact Info */}
-            <div className="bg-white rounded-3xl p-6 md:p-8 border border-orange-100 shadow-soft">
-              <h2 className="text-2xl font-bold text-[#3D1A00] mb-5">Contact information</h2>
-              <div className="space-y-4">
-                <div className="flex items-start gap-4 p-3 rounded-2xl hover:bg-orange-50 transition-all duration-300">
-                  <div className="w-11 h-11 bg-orange-50 rounded-2xl flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-[#A8998A] text-xs uppercase tracking-widest font-semibold mb-1">Email us</p>
-                    <a href="mailto:support@merogadget.com" className="text-[#3D1A00] text-sm font-medium hover:text-orange-600 transition-colors">
-                      support@merogadget.com
-                    </a>
-                  </div>
-                </div>
+            <div className="bg-white rounded-3xl p-6 md:p-7 border border-orange-100 shadow-soft">
+              <h2 className="text-lg font-bold text-[#3D1A00] mb-5">Contact information</h2>
 
-                <div className="flex items-start gap-4 p-3 rounded-2xl hover:bg-orange-50 transition-all duration-300">
-                  <div className="w-11 h-11 bg-orange-50 rounded-2xl flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-[#A8998A] text-xs uppercase tracking-widest font-semibold mb-1">Call us</p>
-                    <a href="tel:+9779800000000" className="text-[#3D1A00] text-sm font-medium hover:text-orange-600 transition-colors">
-                      +977 9800000000
-                    </a>
-                  </div>
-                </div>
+              <div className="space-y-2">
+                {contactInfo.map((item, i) => {
+                  const Icon = item.icon;
+                  const content = (
+                    <div className="flex items-start gap-3.5 p-3 rounded-2xl hover:bg-orange-50 transition-all duration-300">
+                      <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-4 h-4 text-orange-600" strokeWidth={2.2} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[#A8998A] text-[10px] uppercase tracking-widest font-bold mb-1">
+                          {item.label}
+                        </p>
+                        <p className="text-[#3D1A00] text-sm font-medium break-words">
+                          {item.value}
+                        </p>
+                      </div>
+                    </div>
+                  );
 
-                <div className="flex items-start gap-4 p-3 rounded-2xl hover:bg-orange-50 transition-all duration-300">
-                  <div className="w-11 h-11 bg-orange-50 rounded-2xl flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-[#A8998A] text-xs uppercase tracking-widest font-semibold mb-1">Visit us</p>
-                    <p className="text-[#3D1A00] text-sm font-medium">Hall Chowk, Kawasoti-7, Nawalpur, Nepal</p>
-                  </div>
-                </div>
+                  return item.href ? (
+                    <a key={i} href={item.href} className="block">
+                      {content}
+                    </a>
+                  ) : (
+                    <div key={i}>{content}</div>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Business Hours — now in the right column */}
+            {/* Business Hours */}
             <div className="bg-white rounded-3xl p-6 border border-orange-100 shadow-soft">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-orange-600 text-lg">⏰</span>
-                <h3 className="text-[#3D1A00] font-bold">Business hours</h3>
+              <div className="flex items-center gap-2.5 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
+                  <Clock className="w-4 h-4 text-orange-600" strokeWidth={2.2} />
+                </div>
+                <h3 className="text-[#3D1A00] font-bold text-base">Business hours</h3>
               </div>
+
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between items-center py-2.5 border-b border-orange-100">
                   <span className="text-[#7A6A5A]">Monday – Friday</span>
@@ -306,17 +324,22 @@ function ContactPage() {
           </div>
         </div>
 
-        {/* ─── Full-width Map row (below both columns) ─── */}
-        <div className="mt-8 bg-white rounded-3xl p-4 sm:p-5 border border-orange-100 shadow-soft overflow-hidden">
-          <div className="flex items-center gap-2 mb-3 px-2">
-            <span className="text-orange-600 text-lg">📍</span>
-            <h3 className="text-[#3D1A00] font-bold">Our location</h3>
+        {/* ═══ Map ═══ */}
+        <div className="mt-6 bg-white rounded-3xl p-4 sm:p-5 border border-orange-100 shadow-soft overflow-hidden">
+          <div className="flex items-center gap-2.5 mb-4 px-1">
+            <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
+              <MapPin className="w-4 h-4 text-orange-600" strokeWidth={2.2} />
+            </div>
+            <div>
+              <h3 className="text-[#3D1A00] font-bold text-base">Our location</h3>
+              <p className="text-[#7A6A5A] text-xs">Come visit us in person</p>
+            </div>
           </div>
-          <div className="rounded-2xl overflow-hidden">
+          <div className="rounded-2xl overflow-hidden border border-orange-100">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1767.2323808906417!2d84.12138538848436!3d27.64108895483565!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3994503f3dc7db93%3A0x4364ac945539a147!2sHall%20Chok%2C%20Kawasoti%2033000!5e0!3m2!1sen!2snp!4v1780650078620!5m2!1sen!2snp"
               width="100%"
-              height="380"
+              height="360"
               style={{ border: 0 }}
               allowFullScreen={false}
               loading="lazy"
@@ -325,9 +348,6 @@ function ContactPage() {
               className="w-full rounded-2xl block"
             />
           </div>
-          <p className="text-[#7A6A5A] text-xs text-center mt-3">
-            Visit our store for in-person shopping and support
-          </p>
         </div>
 
       </div>

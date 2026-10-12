@@ -1,6 +1,6 @@
-import User from '../models/user.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import User from '../models/user.js';
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -38,6 +38,10 @@ export const register = async (req, res) => {
           name: user.name,
           email: user.email,
           role: user.role,
+          phone: user.phone || '',
+          address: user.address || '',
+          city: user.city || '',
+          postalCode: user.postalCode || '',
           photo: user.photo || ''
         }
       });
@@ -86,6 +90,10 @@ export const login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        phone: user.phone || '',
+        address: user.address || '',
+        city: user.city || '',
+        postalCode: user.postalCode || '',
         photo: user.photo || ''
       }
     });
@@ -121,7 +129,8 @@ export const getMe = async (req, res) => {
         address: user.address || '',
         city: user.city || '',
         postalCode: user.postalCode || '',
-        photo: user.photo || ''
+        photo: user.photo || '',
+        createdAt: user.createdAt
       }
     });
   } catch (error) {
@@ -168,7 +177,8 @@ export const updateProfile = async (req, res) => {
         address: user.address || '',
         city: user.city || '',
         postalCode: user.postalCode || '',
-        photo: user.photo || ''
+        photo: user.photo || '',
+        createdAt: user.createdAt
       }
     });
   } catch (error) {

@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
+import Modal from "../Modal";
 
 // ─── SVG Icons ───
 const Icons = {
@@ -28,6 +29,11 @@ const Icons = {
   Categories: (
     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+    </svg>
+  ),
+  Brands: (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
     </svg>
   ),
   Orders: (
@@ -99,6 +105,7 @@ function AdminLayout() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [lastLogin, setLastLogin] = useState('');
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const sidebarRef = useRef(null);
 
   const navItems = [
@@ -111,22 +118,19 @@ function AdminLayout() {
       dropdownItems: [
         { path: "/admin/products", name: "All Products", icon: Icons.AllProducts },
         { path: "/admin/products/create", name: "Create Product", icon: Icons.CreateProduct },
-        { path: "/admin/categories", name: "Categories", icon: Icons.Categories }
+        { path: "/admin/categories", name: "Categories", icon: Icons.Categories },
+        { path: "/admin/brands", name: "Brands", icon: Icons.Brands }
       ]
     },
     { path: "/admin/orders", name: "Orders", icon: Icons.Orders, dropdown: false },
-    { path: "/admin/users", name: "Users", icon: Icons.Users, dropdown: false },
+    { path: "/admin/users", name: "Users", icon: Icons.Customers, dropdown: false },
     { path: "/admin/contacts", name: "Contacts", icon: Icons.Contacts, dropdown: false },
-
-
-    { path: "/admin/reports", name: "Reports", icon: Icons.Reports },
-    { path: "/admin/analytics", name: "Analytics", icon: Icons.Analytics },
-
-
+    { path: "/admin/reports", name: "Reports", icon: Icons.Reports, dropdown: false },
+    { path: "/admin/analytics", name: "Analytics", icon: Icons.Analytics, dropdown: false },
     { path: "/admin/settings", name: "Settings", icon: Icons.Settings, dropdown: false },
   ];
 
-  const isProductsRoute = location.pathname.includes('/admin/products') || location.pathname.includes('/admin/categories');
+  const isProductsRoute = location.pathname.includes('/admin/products') || location.pathname.includes('/admin/categories') || location.pathname.includes('/admin/brands');
   const isReportsRoute = location.pathname.includes('/admin/reports') || location.pathname.includes('/admin/analytics');
 
   useEffect(() => {
@@ -246,16 +250,25 @@ function AdminLayout() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = async () => {
+  const openLogoutModal = () => {
+    setIsProfileOpen(false);
+    setIsLogoutModalOpen(true);
+  };
+
+  const handleConfirmLogout = async () => {
     try {
       await logout();
       sessionStorage.removeItem('adminLastLogin');
       success("Logged out successfully");
-      setIsProfileOpen(false);
+      setIsLogoutModalOpen(false);
       navigate('/login');
     } catch (error) {
       toastError("Logout failed");
     }
+  };
+
+  const handleCancelLogout = () => {
+    setIsLogoutModalOpen(false);
   };
 
   if (!user || user.role !== 'admin') {
@@ -283,7 +296,7 @@ function AdminLayout() {
               className="flex items-center gap-2.5 transition-all duration-300"
             >
               <img
-                src="/icon.png"
+                src="/Logo.png"
                 alt="MeroGadget"
                 className="w-9 h-9 rounded-full bg-white/10 p-0.5 object-contain hover:scale-105 transition-transform duration-300"
               />
@@ -414,7 +427,7 @@ function AdminLayout() {
 
         <div className="flex-shrink-0 p-3 border-t border-[#4A2410]/60">
           <button
-            onClick={handleLogout}
+            onClick={openLogoutModal}
             className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-[#4A2410] transition-all duration-300 text-[#D4C4B0] hover:text-white group"
           >
             <span className="flex-shrink-0 transition-transform duration-300 group-hover:scale-110">{Icons.Logout}</span>
@@ -432,7 +445,6 @@ function AdminLayout() {
         <header className="bg-white/95 backdrop-blur-md shadow-sm px-6 py-3 sticky top-0 z-10 border-b border-orange-100/70">
           <div className="max-w-[1600px] mx-auto w-full flex justify-between items-center">
 
-            {/* Left: page title / expand button when collapsed */}
             <div className="flex items-center gap-3 shrink-0">
               {!isSidebarOpen && (
                 <button
@@ -450,7 +462,6 @@ function AdminLayout() {
               </p>
             </div>
 
-            {/* Right: Date / Time / Last Login + Fullscreen + Profile */}
             <div className="flex items-center gap-3 sm:gap-4 shrink-0">
 
               <div className="hidden md:flex items-center gap-3 lg:gap-4">
@@ -476,7 +487,6 @@ function AdminLayout() {
                 <div className="w-px h-8 bg-orange-100 shrink-0" />
               </div>
 
-              {/* Fullscreen toggle */}
               <button
                 onClick={toggleFullscreen}
                 className="p-2 rounded-full hover:bg-orange-50 transition-all duration-300 text-[#3D1A00] hover:scale-110 shrink-0"
@@ -484,7 +494,6 @@ function AdminLayout() {
                 aria-label="Toggle fullscreen"
               >
                 {isFullscreen ? (
-                  // Exit fullscreen — inward arrows (4 corners pointing in)
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 3v4a2 2 0 0 1-2 2H3" />
                     <path d="M15 3v4a2 2 0 0 0 2 2h4" />
@@ -492,7 +501,6 @@ function AdminLayout() {
                     <path d="M15 21v-4a2 2 0 0 1 2-2h4" />
                   </svg>
                 ) : (
-                  // Enter fullscreen — outward arrows (4 corners pointing out)
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 9V6a3 3 0 0 1 3-3h3" />
                     <path d="M21 9V6a3 3 0 0 0-3-3h-3" />
@@ -502,14 +510,28 @@ function AdminLayout() {
                 )}
               </button>
 
-              {/* Profile */}
               <div className="relative shrink-0">
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                   className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full hover:bg-orange-50 transition-all duration-300 group"
                 >
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-[#C2410C] flex items-center justify-center text-white font-bold shadow-md group-hover:scale-105 transition-transform duration-300">
-                    {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'A'}
+                  <div className="w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-orange-500 to-[#C2410C] flex items-center justify-center text-white font-bold shadow-md group-hover:scale-105 transition-transform duration-300">
+                    {user?.photo ? (
+                      <img
+                        src={user.photo}
+                        alt={user.name || 'Admin'}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.parentElement.innerText =
+                            user?.name?.charAt(0).toUpperCase() ||
+                            user?.email?.charAt(0).toUpperCase() ||
+                            'A';
+                        }}
+                      />
+                    ) : (
+                      user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'A'
+                    )}
                   </div>
                   <span className="hidden md:block text-sm font-semibold text-[#3D1A00]">
                     {user?.name?.split(' ')[0] || user?.email?.split('@')[0]}
@@ -520,12 +542,33 @@ function AdminLayout() {
                 </button>
 
                 <div
-                  className={`absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-hover border border-orange-100 py-2 z-20 overflow-hidden origin-top-right transition-all duration-200 ${isProfileOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
-                    }`}
+                  className={`absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-hover border border-orange-100 py-2 z-20 overflow-hidden origin-top-right transition-all duration-200 ${
+                    isProfileOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+                  }`}
                 >
-                  <div className="px-4 py-3 border-b border-orange-100 bg-[#FFF4E6]">
-                    <p className="text-sm font-bold text-[#3D1A00] truncate">{user?.name}</p>
-                    <p className="text-xs text-[#7A6A5A] truncate">{user?.email}</p>
+                  <div className="px-4 py-3 border-b border-orange-100 bg-[#FFF4E6] flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-orange-500 to-[#C2410C] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                      {user?.photo ? (
+                        <img
+                          src={user.photo}
+                          alt={user.name || 'Admin'}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.parentElement.innerText =
+                              user?.name?.charAt(0).toUpperCase() ||
+                              user?.email?.charAt(0).toUpperCase() ||
+                              'A';
+                          }}
+                        />
+                      ) : (
+                        user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'A'
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-[#3D1A00] truncate">{user?.name}</p>
+                      <p className="text-xs text-[#7A6A5A] truncate">{user?.email}</p>
+                    </div>
                   </div>
                   <Link
                     to="/admin/profile"
@@ -536,7 +579,7 @@ function AdminLayout() {
                     Profile Settings
                   </Link>
                   <button
-                    onClick={handleLogout}
+                    onClick={openLogoutModal}
                     className="w-full flex items-center gap-2 text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
                   >
                     <span>{Icons.Logout}</span>
@@ -552,13 +595,24 @@ function AdminLayout() {
           </div>
         </header>
 
-        {/* Page Content */}
         <main className="flex-1 p-6 overflow-auto bg-cream">
           <div className="animate-fadeIn">
             <Outlet />
           </div>
         </main>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        isOpen={isLogoutModalOpen}
+        onClose={handleCancelLogout}
+        onConfirm={handleConfirmLogout}
+        title="Confirm Logout"
+        message="Are you sure you want to log out of the admin panel? You will need to sign in again to access it."
+        confirmText="Logout"
+        cancelText="Cancel"
+        type="warning"
+      />
 
       <style>{`
         @keyframes fadeIn {
